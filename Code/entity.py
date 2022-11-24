@@ -32,12 +32,9 @@ class Entity(pygame.sprite.Sprite):
             for sprite in self.obstacle_sprites:
                 if sprite.hitbox.colliderect(self.hitbox):
                     if self.direction.x > 0:  # moving right
-                        print(self.hitbox.right)
                         self.hitbox.right = sprite.hitbox.left
                     if self.direction.x < 0:  # moving left
-                        print(self.hitbox.left)
                         self.hitbox.left = sprite.hitbox.right
-
             return
 
     def wave_value(self):

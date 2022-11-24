@@ -37,7 +37,7 @@ class Level:
         self.data = import_folder_json()
 
         #particle
-        self.animation_player = AnimationPlayer(self.data[1])
+        self.animation_player = AnimationPlayer(self.data['Magic'])
         self.magic_player = MagicPlayer(self.animation_player)
 
         self.ui = UI()

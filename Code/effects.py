@@ -1,7 +1,8 @@
 
 
 class Debuff:
-    pass
+    def __init__(self,enemy):
+        self.Enemy = enemy
 
 class Ignition(Debuff):
     pass
@@ -11,17 +12,6 @@ class Weaken(Debuff):
 
 class Blind(Debuff):
     pass
-
-class Weaken(Debuff):
-    pass
-
-class Weaken(Debuff):
-    pass
-
-class Weaken(Debuff):
-    pass
-
-
 
 
 

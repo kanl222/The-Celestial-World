@@ -28,8 +28,8 @@ class Player(Entity):
         self.attack_magic = True
         self.attacking = False
 
-        self.stats = {'health': 100, 'energy': 100, 'attack': 10, 'magic': 4, 'speed': 5}
-        self.max_stats = {'health': 100, 'energy': 100, 'attack': 20, 'magic': 10,
+        self.stats = {'health': 100, 'energy': 300, 'attack': 10, 'magic': 4, 'speed': 5}
+        self.max_stats = {'health': 100, 'energy': 300, 'attack': 20, 'magic': 10,
                           'speed': 10}
         self.upgrade_cost = {'health': 100, 'energy': 100, 'attack': 100, 'magic': 100,
                              'speed': 100}

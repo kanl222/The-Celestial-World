@@ -3,7 +3,7 @@ from os import walk, listdir
 import pygame
 import base64
 import io
-import json
+import simplejson
 
 
 def import_csv_layout(path):
@@ -29,7 +29,7 @@ def import_folder_base64_Animation(img_list):
     for image in img_list:
         image_surf = pygame.image.load(
             io.BytesIO(base64.b64decode(image.encode('utf-8')))).convert_alpha()
-        if image_surf.get_size() <= (64,64):
+        if image_surf.get_size() <= (64, 64):
             image_surf = pygame.transform.scale(image_surf,
                                                 (image_surf.get_size()[0] * 3,
                                                  image_surf.get_size()[1] * 3))
@@ -42,14 +42,17 @@ def import_folder_base64_Icon(img):
         io.BytesIO(base64.b64decode(img.encode('utf-8')))).convert_alpha()
 
 
-
 def import_folder_json():
-    files = []
-    for _json in listdir('../Json'):
-        if _json.split('.')[-1] == 'json':
-            res = []
-            with open("../Json/{}".format(_json), 'r') as f1:
-                data = json.load(f1)
+    filename = ['Object', 'Item', 'Magic', 'NPC', 'Enemy']
+    files = {}
+    for name in filename:
+        res = []
+        with open("../Json/{}.json".format(name), 'r') as f1:
+                file = f1.read()
+                if not file:
+                    res.append([])
+                    continue
+                data = simplejson.loads(file)
                 for i in data:
                     if data[i]['Animation'] is None and not data[i]['Icon'] is None:
                         pass
@@ -57,5 +60,5 @@ def import_folder_json():
                         data[i]['Animation'] = import_folder_base64_Animation(
                             data[i]['Animation'])
                 res.append(data)
-            files.append(res)
+        files[name] = res
     return files

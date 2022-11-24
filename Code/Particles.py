@@ -38,19 +38,6 @@ class ParticleEffect(pygame.sprite.Sprite):
 
         self.pos = pos
 
-    def rot_center(self,image, angle):
-        try:
-            """rotate an image while keeping its center and size"""
-            orig_rect = image.get_rect()
-            rot_image = pygame.transform.rotate(image, angle)
-            rot_rect = orig_rect.copy()
-            rot_rect.center = rot_image.get_rect().center
-            rot_image = rot_image.subsurface(rot_rect).copy()
-            return rot_image
-        except ValueError:
-            return rot_image
-
-
     def animate(self):
         self.frame_index += self.animation_speed
         if self.frame_index >= len(self.frames):
@@ -59,19 +46,10 @@ class ParticleEffect(pygame.sprite.Sprite):
         else:
             self.image = self.frames[int(self.frame_index)]
 
-    def animate_rotate(self):
-        self.angle += 6
-        if self.angle % 360 == 0:
-            self.kill()
-        else:
-            self.image = self.rot_center(self.orig_image,self.angle)
+
 
 
     def update(self):
-        if self.sprite_type == 'magic_circle':
-            self.animate_rotate()
-
-        elif self.sprite_type == 'magic':
-            self.animate()
+        self.animate()
 
 

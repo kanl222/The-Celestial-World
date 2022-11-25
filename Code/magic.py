@@ -44,16 +44,15 @@ class MagicPlayer:
 					y = player.rect.centery + offset_y
 					self.animation_player.create_particles('Flame',(x,y),groups)
 
-	def Magiccirle(self, player, cost, groups,sprites):
+	def Magiccirle(self, player, cost:int, groups:list):
 		if player.energy >= cost:
-			for sprite in sprites:
+			for sprite in groups[0]:
 				if sprite.__class__.__name__ == 'Enemy':
 					player.energy -= cost
 					enemy_vec = pygame.math.Vector2(sprite.rect.center)
 					player_vec = pygame.math.Vector2(player.rect.center)
 					if (player_vec - enemy_vec).magnitude() <= 400:
-						sprite.Moving = False
-						self.animation_player.create_particles('Flamecircle',sprite, groups,'magic')
+						self.animation_player.create_particles('Flamecircle',sprite.rect.center, groups)
 
 
 

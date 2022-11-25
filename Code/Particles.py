@@ -18,22 +18,20 @@ class AnimationPlayer:
     def create_grass_particles(self, pos, groups):
         ParticleEffect(pos, choice(self.frames['leaf']), groups)
 
-    def create_particles(self, animation_type, sprite, groups,sprite_type):
-        ParticleEffect(sprite.rect.center,self.frames[animation_type]['Animation'], groups,sprite_type,sprite)
+    def create_particles(self, animation_type, pos, groups):
+        ParticleEffect(pos,self.frames[animation_type]['Animation'], groups)
 
 
 class ParticleEffect(pygame.sprite.Sprite):
-    def __init__(self, pos, animation_frames, groups,sprite_type,sprite):
+    def __init__(self, pos, animation_frames, groups):
         super().__init__(groups)
-        self.Sprite_ = sprite
+        self.sprite_type = 'magic'
         self.queue = 2
-        self.sprite_type = sprite_type
         self.frame_index = 0
         self.angle = 0
         self.animation_speed = 0.15
         self.frames = animation_frames
         self.image = self.frames[int(self.frame_index)]
-        self.orig_image = self.image
         self.rect = self.image.get_rect(center=pos)
 
         self.pos = pos
@@ -41,15 +39,10 @@ class ParticleEffect(pygame.sprite.Sprite):
     def animate(self):
         self.frame_index += self.animation_speed
         if self.frame_index >= len(self.frames):
-            self.Sprite_.Moving = True
             self.kill()
         else:
             self.image = self.frames[int(self.frame_index)]
 
-
-
-
     def update(self):
         self.animate()
-
 

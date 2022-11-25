@@ -35,8 +35,8 @@ BAR_COLOR_SELECTED = '#111111'
 UPGRADE_BG_COLOR_SELECTED = '#EEEEEE'
 
 magic_data = {
-	'flame': {'strength': 5,'cost': 20,'graphic':'fire.png'},
-	'heal' : {'strength': 20,'cost': 10,'graphic':'heal.png'},
+	'flame': {'strength': 5,'cost': 20,'graphic':'fire.png','cooldown':12},
+	'heal' : {'strength': 20,'cost': 10,'graphic':'heal.png',},
 	'Magiccirle' : {'strength': 20,'cost': 10,'graphic':'heal.png','cooldown':1000}}
 
 monster_data = {

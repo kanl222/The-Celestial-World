@@ -1,8 +1,7 @@
 import pygame, sys
-from Sitting import *
-from level import *
-from debug import *
-
+from Sitting import FPS
+from level import Level
+from debug import debug
 
 
 class Game:
@@ -23,11 +22,13 @@ class Game:
                         pygame.quit()
                         sys.exit()
 
-            self.screen.fill('black')
             self.level.run()
             debug(self.clock.get_fps(),200,10)
             pygame.display.update()
+            pygame.display.flip()
             self.clock.tick(FPS)
+            self.screen.fill('black')
+
 
 
 if __name__ == '__main__':

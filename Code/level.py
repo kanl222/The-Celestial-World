@@ -23,7 +23,6 @@ class Level:
         # sprite group setup
         self.visible_sprites = YSortCameraGroup()
         self.obstacle_sprites = pygame.sprite.Group()
-        self.ParticleEffect_sprites = ParticleEffectGroup()
         location = 1
 
         # attack sprites
@@ -102,17 +101,7 @@ class Level:
                                                                 False)
                 if collision_sprites:
                     for target_sprite in collision_sprites:
-                        if target_sprite.sprite_type == 'grass':
-                            pos = target_sprite.rect.center
-                            offset = pygame.math.Vector2(0, 75)
-                            for leaf in range(randint(3, 6)):
-                                self.animation_player.create_grass_particles(pos - offset,
-                                                                             [
-                                                                                 self.visible_sprites])
-                            target_sprite.kill()
-                        else:
-                            target_sprite.get_damage(self.player,
-                                                     attack_sprite.sprite_type)
+                            Thread(target=target_sprite.get_damage , args=(self.player,attack_sprite.sprite_type)).run()
 
     def damage_player(self, amount, attack_type):
         if self.player.vulnerable:
@@ -133,21 +122,19 @@ class Level:
 
         if style == 'flame':
             self.magic_player.flame(self.player, cost,
-                                    [self.ParticleEffect_sprites,[]])
+                                    [self.visible_sprites,self.attack_sprites])
 
         if style == 'Magiccirle':
             self.magic_player.Magiccirle(self.player, cost,
-                                    [self.visible_sprites,[]]
-                                         ,self.visible_sprites.sprites())
+                                    [self.visible_sprites,self.attack_sprites])
 
 
     def Update_UI(self):
         self.ui.display(self.player)
 
     def run(self):
-        Thread(target=self.visible_sprites.custom_draw, args=(self.player,)).run()
-        Thread(target=self.Update_UI, args=()).run()
-        self.ParticleEffect_sprites.update()
+        self.visible_sprites.custom_draw(self.player)
+        Thread(target=self.Update_UI).run()
         self.visible_sprites.update()
         self.visible_sprites.enemy_update(self.player)
         self.player_attack_logic()
@@ -176,7 +163,7 @@ class YSortCameraGroup(pygame.sprite.Group):
         floor_offset_pos = self.floor_rect.topleft - self.offset
         self.display_surface.blit(self.floor_surf, floor_offset_pos)
 
-        for sprite in sorted(self.sprites(), key=lambda sprite: (sprite.queue,player.rect.center)):
+        for sprite in sorted(self.sprites(), key=lambda sprite: player.rect.centery):
             offset_pos = sprite.rect.topleft - self.offset
             self.display_surface.blit(sprite.image, offset_pos)
 
@@ -186,16 +173,3 @@ class YSortCameraGroup(pygame.sprite.Group):
         for enemy in enemy_sprites:
             enemy.enemy_update(player)
 
-
-class ParticleEffectGroup(pygame.sprite.Group):
-    def __init__(self):
-        # general setup
-        super().__init__()
-        self.display_surface = pygame.display.get_surface()
-        self.half_width = self.display_surface.get_size()[0] // 2
-        self.half_height = self.display_surface.get_size()[1] // 2
-        self.offset = pygame.math.Vector2()
-
-    def update(self):
-        for sprite in self.sprites():
-            self.display_surface.blit(sprite.image, sprite.rect.center)

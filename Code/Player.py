@@ -10,7 +10,7 @@ class Player(Entity):
         self.image = pygame.image.load(
             '../graphics/player/Down_idle/Down_ (1).png').convert_alpha()
         self.rect = self.image.get_rect(topleft=pos)
-        self.hitbox = self.rect.inflate(0,HITBOX_OFFSET['player'])
+        self.hitbox = self.rect.inflate(0,-10)
         self.direction = pygame.math.Vector2()
         self.speed = 5
         self.queue = 2
@@ -22,6 +22,7 @@ class Player(Entity):
 
         self.create_magic = create_magic
         self.magic_index = -1
+        print(magic_data)
         self.magic = list(magic_data.keys())[self.magic_index]
         self.can_switch_magic = True
         self.magic_switch_time = None
@@ -103,21 +104,16 @@ class Player(Entity):
 
     def animate(self):
         animation = self.animations[self.status]
-
-        # loop over the frame index
         self.frame_index += self.animation_speed
         if self.frame_index >= len(animation):
             self.frame_index = 0
 
-        # set the image
 
-        self.image = animation[int(self.frame_index)]
+        self.image = animation[int(self.frame_index)].convert_alpha()
         self.rect = self.image.get_rect(center=self.hitbox.center)
         self.image = pygame.transform.scale(self.image,
                                                  (self.image.get_size()[0] * 3,
                                                   self.image.get_size()[1] * 3))
-        # flicker
-        self.image.set_alpha(255)
 
     def add_energy(self,strength):
         self.energy += strength
@@ -148,6 +144,27 @@ class Player(Entity):
             self.stats['health'] += self.upgrade_cost['health']
             self.stats['energy'] += self.upgrade_cost['energy']
             self.xp_before_up_level += int(self.xp_before_up_level * 0.25)
+
+    def get_full_weapon_damage(self):
+        base_damage = self.stats['attack']
+
+
+    def get_full_magic_damage(self):
+        base_damage = self.stats['magic']
+        spell_damage = magic_data[self.magic]['strength']
+        return base_damage + spell_damage
+
+    def get_value_by_index(self, index):
+        return list(self.stats.values())[index]
+
+    def get_cost_by_index(self, index):
+        return list(self.upgrade_cost.values())[index]
+
+    def energy_recovery(self):
+        if self.energy < self.stats['energy']:
+            self.energy += 0.01 * self.stats['magic']
+        else:
+            self.energy = self.stats['energy']
 
 
     def update(self):

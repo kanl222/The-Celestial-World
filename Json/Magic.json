@@ -33,7 +33,7 @@
   },
   "Flamecircle": {
     "Mana": 20,
-    "Damage": 20,
+    "Damage": 1,
     "Cooldown": 10,
     "Rang": 0,
     "Up_level_magic": 5,

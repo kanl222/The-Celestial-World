@@ -5,7 +5,7 @@ from tile import Tile
 from Player import Player
 from debug import debug
 from magic import MagicPlayer
-from Particles import AnimationPlayer
+from Particles import AnimationPlayer,Animation
 from Mobs import Enemy
 from random import randint
 from Weapon import Weapon
@@ -22,6 +22,7 @@ class Level:
 
         # sprite group setup
         self.visible_sprites = YSortCameraGroup()
+        self.animation = Animation()
         self.obstacle_sprites = pygame.sprite.Group()
         location = 1
 
@@ -102,6 +103,7 @@ class Level:
                 if collision_sprites:
                     for target_sprite in collision_sprites:
                             Thread(target=target_sprite.get_damage , args=(self.player,attack_sprite.sprite_type)).run()
+                            self.animation.create_damage_indicator(target_sprite,self.player.get_full_magic_damage(),[self.visible_sprites])
 
     def damage_player(self, amount, attack_type):
         if self.player.vulnerable:

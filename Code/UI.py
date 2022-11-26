@@ -19,7 +19,7 @@ class UI:
     def create_text_level(self, level,rect):
         Level_text = pygame.font.SysFont(ui_font, 64).render(str(level), True,
                                                              'white')
-        Level_text_rect = Level_text.get_rect(center=(90 - len(str(level)),rect.get_size()[1]//2 + 5))
+        Level_text_rect = Level_text.get_rect(center=(180//2,rect.get_size()[1]//2 + 5))
         self.display_surface.blit(Level_text, Level_text_rect)
 
 

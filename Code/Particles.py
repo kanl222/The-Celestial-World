@@ -28,13 +28,10 @@ class ParticleEffect(pygame.sprite.Sprite):
         self.sprite_type = 'magic'
         self.queue = 2
         self.frame_index = 0
-        self.angle = 0
         self.animation_speed = 0.15
         self.frames = animation_frames
         self.image = self.frames[int(self.frame_index)]
         self.rect = self.image.get_rect(center=pos)
-
-        self.pos = pos
 
     def animate(self):
         self.frame_index += self.animation_speed
@@ -46,3 +43,31 @@ class ParticleEffect(pygame.sprite.Sprite):
     def update(self):
         self.animate()
 
+
+class Animation:
+    def create_damage_indicator(self, sprite,damage:int,groups:list):
+        DamageIndicator(sprite,damage,groups)
+
+
+class DamageIndicator(pygame.sprite.Sprite):
+    def __init__(self, sprite,damage:int,groups:list):
+        super().__init__(groups)
+        self.sprite_type = 'DamageIndicator'
+        self.queue = 2
+        self.animation_speed = 1
+        self.move_y = 0
+        ui_font = 'Serif'
+        font = pygame.font.Font(None, 30)
+        self.image = pygame.font.SysFont(ui_font, 16).render(str(-damage), True, 'red')
+        x,y = sprite.rect.midtop
+        self.rect = self.image.get_rect(midtop=(x,y-10))
+
+    def animate(self):
+        if self.move_y <= 14:
+            self.rect.y -= self.animation_speed
+            self.move_y += self.animation_speed
+        else:
+            self.kill()
+
+    def update(self):
+        self.animate()

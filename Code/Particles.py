@@ -1,16 +1,11 @@
-import time
-
 import pygame
-from support import import_folder,import_folder_base64_Animation
 from random import choice
-import json
-import base64
-import io
+import pygame.freetype
 
-class AnimationPlayer:
-    def __init__(self,frames):
+
+class Animation:
+    def __init__(self, frames):
         self.frames = frames[0]
-
 
     def reflect_images(self, frames):
         return [pygame.transform.flip(x, True, False) for x in frames]
@@ -19,7 +14,10 @@ class AnimationPlayer:
         ParticleEffect(pos, choice(self.frames['leaf']), groups)
 
     def create_particles(self, animation_type, pos, groups):
-        ParticleEffect(pos,self.frames[animation_type]['Animation'], groups)
+        ParticleEffect(pos, self.frames[animation_type]['Animation'], groups)
+
+    def create_damage_indicator(self, pos: tuple, damage: int, groups: list):
+        DamageIndicator(pos, damage, groups)
 
 
 class ParticleEffect(pygame.sprite.Sprite):
@@ -44,28 +42,22 @@ class ParticleEffect(pygame.sprite.Sprite):
         self.animate()
 
 
-class Animation:
-    def create_damage_indicator(self, sprite,damage:int,groups:list):
-        DamageIndicator(sprite,damage,groups)
-
-
 class DamageIndicator(pygame.sprite.Sprite):
-    def __init__(self, sprite,damage:int,groups:list):
+    def __init__(self, pos: tuple, damage: int, groups: list):
         super().__init__(groups)
+        self.display_surface = pygame.display.get_surface()
         self.sprite_type = 'DamageIndicator'
-        self.queue = 2
-        self.animation_speed = 1
-        self.move_y = 0
+        self.queue = 4
+        self.moving_y = 0
         ui_font = 'Serif'
-        font = pygame.font.Font(None, 30)
-        self.image = pygame.font.SysFont(ui_font, 16).render(str(-damage), True, 'red')
-        x,y = sprite.rect.midtop
-        self.rect = self.image.get_rect(midtop=(x,y-10))
+        self.font = pygame.font.SysFont(ui_font, 20,True)
+        self.image = self.font.render(str(-damage), True, 'red')
+        self.rect = self.image.get_rect(midtop=(pos[0], pos[1] - 10))
 
     def animate(self):
-        if self.move_y <= 14:
-            self.rect.y -= self.animation_speed
-            self.move_y += self.animation_speed
+        if self.moving_y < 10:
+            self.rect.y -= 2
+            self.moving_y += 2
         else:
             self.kill()
 

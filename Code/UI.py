@@ -1,6 +1,6 @@
 import pygame
 from Sitting import *
-ui_font = 'Serif'
+ui_font = UI_FONT
 font = pygame.font.Font(None,30)
 
 
@@ -44,13 +44,6 @@ class UI:
         pygame.draw.rect(self.display_surface, color, current_rect)
         pygame.draw.rect(self.display_surface, UI_BORDER_COLOR, bg_rect, 3)
 
-    def debug(self, info, y=10, x=10):
-        display_surface = pygame.display.get_surface()
-        debuf_surf = font.render(str(info), True, 'White')
-        debuf_rect = debuf_surf.get_rect(topleft=(x, y))
-        pygame.draw.rect(display_surface, 'Black', debuf_rect)
-        display_surface.blit(debuf_surf, debuf_rect)
-
     def Update(self):
         pass
 
@@ -64,12 +57,6 @@ class UI:
         self.indicator(player.health, player.stats['health'], self.health_bar_rect)
         self.indicator(player.energy, player.stats['energy'], self.energy_bar_rect)
         self.create_text_level(player.level,self.image)
-
-        Width_display = self.display_surface.get_size()[0]
-        Heigth_display = self.display_surface.get_size()[1]
-        pygame.draw.rect(self.display_surface, 'grey', (20, Heigth_display - 70, 50, 50))
-        pygame.draw.rect(self.display_surface, 'yellow',
-                         (75, Heigth_display - 70, 50, 50))
 
 
 

@@ -22,7 +22,6 @@ class Player(Entity):
 
         self.create_magic = create_magic
         self.magic_index = -1
-        print(magic_data)
         self.magic = list(magic_data.keys())[self.magic_index]
         self.can_switch_magic = True
         self.magic_switch_time = None
@@ -80,8 +79,6 @@ class Player(Entity):
         else:
             self.direction.x = 0
 
-        if keys[pygame.K_m]:
-            self.exp += 100
 
         if keys[pygame.K_LCTRL]:
             if self.attack_magic:

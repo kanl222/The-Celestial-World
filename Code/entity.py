@@ -1,13 +1,13 @@
-import pygame
+from pygame import sprite,math,time
 from math import sin
 
 
-class Entity(pygame.sprite.Sprite):
+class Entity(sprite.Sprite):
     def __init__(self, groups):
         super().__init__(groups)
         self.frame_index = 0
         self.animation_speed = 0.15
-        self.direction = pygame.math.Vector2()
+        self.direction = math.Vector2()
 
     def move(self, speed):
         if self.direction.magnitude() != 0:
@@ -38,8 +38,11 @@ class Entity(pygame.sprite.Sprite):
             return
 
     def wave_value(self):
-        value = sin(pygame.time.get_ticks())
+        value = sin(time.get_ticks())
         if value >= 0:
             return 255
         else:
             return 0
+
+    def EntityVector2(self) -> math.Vector2:
+        return math.Vector2(self.rect.center)

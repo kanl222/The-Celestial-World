@@ -5,7 +5,7 @@ from tile import Tile
 from Player import Player
 from debug import debug
 from magic import MagicPlayer
-from Particles import AnimationPlayer,Animation
+from Particles import Animation
 from Mobs import Enemy
 from random import randint
 from Weapon import Weapon
@@ -22,7 +22,6 @@ class Level:
 
         # sprite group setup
         self.visible_sprites = YSortCameraGroup()
-        self.animation = Animation()
         self.obstacle_sprites = pygame.sprite.Group()
         location = 1
 
@@ -37,8 +36,8 @@ class Level:
         self.data = import_folder_json()
 
         #particle
-        self.animation_player = AnimationPlayer(self.data['Magic'])
-        self.magic_player = MagicPlayer(self.animation_player)
+        self.animation = Animation(self.data['Magic'])
+        self.magic_player = MagicPlayer(self.animation)
 
         self.ui = UI()
 
@@ -68,12 +67,15 @@ class Level:
                             else:
                                 if col == '113':
                                     monster_name = 'squid'
+                                else:
+                                    monster_name = 'squid'
                                 Enemy(
                                     monster_name,
                                     (x, y),
                                     [self.visible_sprites,self.attackable_sprites],
                                     self.obstacle_sprites,
                                     self.damage_player,
+                                    self.trigger_damage,
                                     self.trigger_death_particles,
                                     self.add_exp)
 
@@ -102,8 +104,7 @@ class Level:
                                                                 False)
                 if collision_sprites:
                     for target_sprite in collision_sprites:
-                            Thread(target=target_sprite.get_damage , args=(self.player,attack_sprite.sprite_type)).run()
-                            self.animation.create_damage_indicator(target_sprite,self.player.get_full_magic_damage(),[self.visible_sprites])
+                            target_sprite.get_damage(self.player,attack_sprite.sprite_type)
 
     def damage_player(self, amount, attack_type):
         if self.player.vulnerable:
@@ -112,7 +113,10 @@ class Level:
             self.player.hurt_time = pygame.time.get_ticks()
 
     def trigger_death_particles(self, pos, particle_type):
-        self.animation_player.create_particles(particle_type, pos, self.visible_sprites)
+        self.animation.create_particles(particle_type, pos, self.visible_sprites)
+
+    def trigger_damage(self,rect,damage):
+        self.animation.create_damage_indicator(rect,damage,self.visible_sprites)
 
     def add_exp(self, amount):
 
@@ -158,20 +162,22 @@ class YSortCameraGroup(pygame.sprite.Group):
         self.floor_surf = pygame.transform.scale(self.floor_surf,
                                                  (self.floor_surf.get_size()[0]*3,self.floor_surf.get_size()[1]*3 ))
 
-    def custom_draw(self, player):
+    def custom_draw(self, player:Player):
         self.offset.x = player.rect.centerx - self.half_width
         self.offset.y = player.rect.centery - self.half_height
 
         floor_offset_pos = self.floor_rect.topleft - self.offset
         self.display_surface.blit(self.floor_surf, floor_offset_pos)
+        sprites = [sprite for sprite in self.sprites()
+                         if (player.EntityVector2() - pygame.math.Vector2(sprite.rect.center)).magnitude() <= 800]
+        for sprite in sorted(sprites, key=lambda sprite: player.rect.centery):
+                offset_pos = sprite.rect.topleft - self.offset
+                self.display_surface.blit(sprite.image, offset_pos)
 
-        for sprite in sorted(self.sprites(), key=lambda sprite: player.rect.centery):
-            offset_pos = sprite.rect.topleft - self.offset
-            self.display_surface.blit(sprite.image, offset_pos)
-
-    def enemy_update(self, player):
+    def enemy_update(self, player:Player):
         enemy_sprites = [sprite for sprite in self.sprites() if
-                         hasattr(sprite, 'sprite_type') and sprite.sprite_type == 'enemy']
+                         hasattr(sprite, 'sprite_type') and sprite.sprite_type == 'enemy'
+                         if (player.EntityVector2() - sprite.EntityVector2()).magnitude() <= 500]
         for enemy in enemy_sprites:
             enemy.enemy_update(player)
 

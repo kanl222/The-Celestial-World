@@ -6,7 +6,7 @@ from support import *
 
 
 class Enemy(Entity):
-    def __init__(self, monster_name, pos, groups, obstacle_sprites, damage_player,
+    def __init__(self, monster_name, pos, groups, obstacle_sprites, damage_player,trigger_damage,
                  trigger_death_particles, add_exp):
 
         # general setup
@@ -41,6 +41,7 @@ class Enemy(Entity):
         self.attack_cooldown = 400
         self.damage_player = damage_player
         self.trigger_death_particles = trigger_death_particles
+        self.trigger_damage = trigger_damage
         self.add_exp = add_exp
 
         # invincibility timer
@@ -95,7 +96,6 @@ class Enemy(Entity):
             if self.status == 'attack':
                 self.can_attack = False
             self.frame_index = 0
-
         self.image = animation[int(self.frame_index)].convert_alpha()
         self.rect = self.image.get_rect(center=self.hitbox.center)
 
@@ -112,11 +112,12 @@ class Enemy(Entity):
 
     def get_damage(self, player, attack_type):
         if self.vulnerable:
-            #self.direction = self.get_player_distance_direction(player)[1]
-            #if attack_type == 'weapon':
-            #    self.health -= player.get_full_weapon_damage()
-
-            self.health -= player.get_full_magic_damage()
+            self.direction = self.get_player_distance_direction(player)[1]
+            if attack_type == 'weapon':
+                self.health -= player.get_full_weapon_damage()
+            else:
+                self.health -= player.get_full_magic_damage()
+            self.trigger_damage(self.rect.midtop,player.get_full_magic_damage())
             self.hit_time = pygame.time.get_ticks()
             self.vulnerable = False
 

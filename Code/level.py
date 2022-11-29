@@ -140,7 +140,7 @@ class Level:
 
     def run(self):
         self.visible_sprites.custom_draw(self.player)
-        Thread(target=self.Update_UI).run()
+        Thread(target=self.Update_UI ,daemon=True).run()
         self.visible_sprites.update()
         self.visible_sprites.enemy_update(self.player)
         self.player_attack_logic()
@@ -153,7 +153,10 @@ class YSortCameraGroup(pygame.sprite.Group):
         self.display_surface = pygame.display.get_surface()
         self.half_width = self.display_surface.get_size()[0] // 2
         self.half_height = self.display_surface.get_size()[1] // 2
+        self.distance_w =  self.display_surface.get_width()//2 + 160
+        self.distance_h = self.display_surface.get_height() // 2 + 160
         self.offset = pygame.math.Vector2()
+
 
         # creating the floor
         self.floor_surf = pygame.image.load(
@@ -169,10 +172,14 @@ class YSortCameraGroup(pygame.sprite.Group):
         floor_offset_pos = self.floor_rect.topleft - self.offset
         self.display_surface.blit(self.floor_surf, floor_offset_pos)
         sprites = [sprite for sprite in self.sprites()
-                         if (player.EntityVector2() - pygame.math.Vector2(sprite.rect.center)).magnitude() <= 800]
+                if player.EntityVector2().distance_to(pygame.math.Vector2(sprite.rect.center)) <= self.distance_w
+                if abs(player.EntityVector2().y - pygame.math.Vector2(sprite.rect.center).y) <= self.distance_h]
+        self.count_sprite_updates = len(sprites)
         for sprite in sorted(sprites, key=lambda sprite: player.rect.centery):
                 offset_pos = sprite.rect.topleft - self.offset
                 self.display_surface.blit(sprite.image, offset_pos)
+
+
 
     def enemy_update(self, player:Player):
         enemy_sprites = [sprite for sprite in self.sprites() if

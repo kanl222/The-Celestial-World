@@ -1,6 +1,6 @@
 import pygame
 from Sitting import *
-ui_font = UI_FONT
+ui_font = 'serif'
 font = pygame.font.Font(None,30)
 
 

@@ -16,8 +16,8 @@ class Animation:
     def create_particles(self, animation_type, pos, groups):
         ParticleEffect(pos, self.frames[animation_type]['Animation'], groups)
 
-    def create_damage_indicator(self, pos: tuple, damage: int, groups: list):
-        DamageIndicator(pos, damage, groups)
+    def create_number(self, pos: tuple, number: int, groups: list,color=None):
+        NumberRender(pos, number, groups,color)
 
 
 class ParticleEffect(pygame.sprite.Sprite):
@@ -42,22 +42,25 @@ class ParticleEffect(pygame.sprite.Sprite):
         self.animate()
 
 
-class DamageIndicator(pygame.sprite.Sprite):
-    def __init__(self, pos: tuple, damage: int, groups: list):
+class NumberRender(pygame.sprite.Sprite):
+    def __init__(self, pos: tuple, number: int,groups: list, color='white'):
         super().__init__(groups)
         self.display_surface = pygame.display.get_surface()
         self.sprite_type = 'DamageIndicator'
         self.queue = 4
         self.moving_y = 0
+        self.animation_speed = 0.8
         ui_font = 'Serif'
         self.font = pygame.font.SysFont(ui_font, 20,True)
-        self.image = self.font.render(str(-damage), True, 'red')
+        print(number)
+        print('+' if number > 0 else '-' + str(number))
+        self.image = self.font.render(f'+{number}' if number > 0 else f'-{number}', True, color)
         self.rect = self.image.get_rect(midtop=(pos[0], pos[1] - 10))
 
     def animate(self):
-        if self.moving_y < 10:
-            self.rect.y -= 2
-            self.moving_y += 2
+        if self.moving_y < 16:
+            self.rect.y -= self.animation_speed
+            self.moving_y += self.animation_speed
         else:
             self.kill()
 

@@ -75,7 +75,7 @@ class Level:
                                     [self.visible_sprites,self.attackable_sprites],
                                     self.obstacle_sprites,
                                     self.damage_player,
-                                    self.trigger_damage,
+                                    self.trigger_number,
                                     self.trigger_death_particles,
                                     self.add_exp)
 
@@ -115,8 +115,8 @@ class Level:
     def trigger_death_particles(self, pos, particle_type):
         self.animation.create_particles(particle_type, pos, self.visible_sprites)
 
-    def trigger_damage(self,rect,damage):
-        self.animation.create_damage_indicator(rect,damage,self.visible_sprites)
+    def trigger_number(self,rect,number,color):
+        self.animation.create_number(rect,number,[self.visible_sprites],color)
 
     def add_exp(self, amount):
 

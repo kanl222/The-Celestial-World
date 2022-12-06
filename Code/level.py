@@ -3,15 +3,13 @@ from support import import_folder_json,import_csv_layout
 from Sitting import *
 from tile import Tile
 from Player import Player
-from debug import debug
 from magic import MagicPlayer
 from Particles import Animation
 from Mobs import Enemy
-from random import randint
 from Weapon import Weapon
 from threading import Thread
+from Object.Object_ import Object
 
-import sys
 from UI import UI
 
 
@@ -32,8 +30,11 @@ class Level:
 
         # sprite setup
         self.load_map()
-        self.create_map(location)
+        self.Object_sprites = Object
         self.data = import_folder_json()
+        self.data_object = self.data['Object'][0]
+        print(self.data_object)
+        self.create_map(location)
 
         #particle
         self.animation = Animation(self.data['Magic'])
@@ -62,8 +63,8 @@ class Level:
                                     (x, y),
                                     [self.visible_sprites],
                                     self.obstacle_sprites,self.create_attack,self.destroy_attack,self.create_magic)
-                            elif col in [str(i) for i in range(203,206)]:
-                                Tile((x, y),[self.visible_sprites, self.obstacle_sprites])
+                            elif col in self.data_object.keys():
+                                self.Object_sprites.AddStaticObject('',self.data_object[col],(x, y),[self.visible_sprites,self.obstacle_sprites])
                             else:
                                 if col == '113':
                                     monster_name = 'squid'
@@ -123,16 +124,15 @@ class Level:
         self.player.exp += amount
 
     def create_magic(self, style, strength, cost):
-        if style == 'heal':
-            self.magic_player.heal(self.player, strength, cost, [self.visible_sprites])
+        magic = {"support":{
+            'heal': self.magic_player.heal},
+            "Attack":{
+            'flame': self.magic_player.flame,
+            'Magiccirle': self.magic_player.Magiccirle
+            }
+        }
 
-        if style == 'flame':
-            self.magic_player.flame(self.player, cost,
-                                    [self.visible_sprites,self.attack_sprites])
-
-        if style == 'Magiccirle':
-            self.magic_player.Magiccirle(self.player, cost,
-                                    [self.visible_sprites,self.attack_sprites])
+        magic['Attack'][style](self.player, cost,[self.visible_sprites,self.attack_sprites])
 
 
     def Update_UI(self):
@@ -175,7 +175,7 @@ class YSortCameraGroup(pygame.sprite.Group):
                 if player.EntityVector2().distance_to(pygame.math.Vector2(sprite.rect.center)) <= self.distance_w
                 if abs(player.EntityVector2().y - pygame.math.Vector2(sprite.rect.center).y) <= self.distance_h]
         self.count_sprite_updates = len(sprites)
-        for sprite in sorted(sprites, key=lambda sprite: player.rect.centery):
+        for sprite in sorted(sprites, key=lambda sprite: sprite.rect.midbottom[1]):
                 offset_pos = sprite.rect.topleft - self.offset
                 self.display_surface.blit(sprite.image, offset_pos)
 
@@ -187,4 +187,5 @@ class YSortCameraGroup(pygame.sprite.Group):
                          if (player.EntityVector2() - sprite.EntityVector2()).magnitude() <= 500]
         for enemy in enemy_sprites:
             enemy.enemy_update(player)
+            pygame.draw.rect(self.display_surface, (255, 0, 0), enemy.rect, 2)
 

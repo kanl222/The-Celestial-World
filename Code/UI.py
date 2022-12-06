@@ -1,6 +1,7 @@
 import pygame
 from Sitting import *
 ui_font = 'serif'
+pygame.font.init()
 font = pygame.font.Font(None,30)
 
 
@@ -10,9 +11,9 @@ class UI:
         self.font = pygame.font.Font(UI_FONT, UI_FONT_SIZE)
 
         # bar setup
-        health_bar_width, bar_heigth = 430, 25
+        health_bar_width, bar_heigth = 430, 28
         self.health_bar_rect = pygame.Rect(150, 44, health_bar_width, bar_heigth)
-        self.energy_bar_rect = pygame.Rect(150, 88, 360, 34)
+        self.energy_bar_rect = pygame.Rect(150, 94, 360, 28)
         self.image = pygame.image.load('../graphics/interface2.png').convert_alpha()
         self.rect = self.image.get_rect(topleft=(10, 10))
 
@@ -20,29 +21,24 @@ class UI:
         Level_text = pygame.font.SysFont(ui_font, 64).render(str(level), True,
                                                              'white')
         Level_text_rect = Level_text.get_rect(center=(180//2,rect.get_size()[1]//2 + 5))
-        self.display_surface.blit(Level_text, Level_text_rect)
+        return self.display_surface.blit(Level_text, Level_text_rect)
 
 
     def indicator(self, current, max_amount,bg_rect):
         indicator_text = pygame.font.SysFont(ui_font, 20).render(f'{current}/{max_amount}', True,
                                                              'white')
         indicator_rect = indicator_text.get_rect(center=(bg_rect.center))
-        self.display_surface.blit(indicator_text,indicator_rect)
+        return self.display_surface.blit(indicator_text,indicator_rect)
 
 
     def show_bar(self, current, max_amount, bg_rect, color):
         # draw bg
         pygame.draw.rect(self.display_surface, UI_BG_COLOR, bg_rect)
-
-        # converting stat to pixel
         ratio = current / max_amount
         current_width = bg_rect.width * ratio
         current_rect = bg_rect.copy()
         current_rect.width = current_width
-
-        # drawing the bar
         pygame.draw.rect(self.display_surface, color, current_rect)
-        pygame.draw.rect(self.display_surface, UI_BORDER_COLOR, bg_rect, 3)
 
     def Update(self):
         pass

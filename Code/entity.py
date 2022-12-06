@@ -37,12 +37,6 @@ class Entity(sprite.Sprite):
                         self.hitbox.left = sprite.hitbox.right
             return
 
-    def wave_value(self):
-        value = sin(time.get_ticks())
-        if value >= 0:
-            return 255
-        else:
-            return 0
 
     def EntityVector2(self) -> math.Vector2:
         return math.Vector2(self.rect.center)

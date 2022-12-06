@@ -52,7 +52,7 @@ class MagicPlayer:
 					enemy_vec = pygame.math.Vector2(sprite.rect.center)
 					player_vec = pygame.math.Vector2(player.rect.center)
 					if (player_vec - enemy_vec).magnitude() <= 400:
-						self.animation_player.create_particles('Flamecircle',sprite.rect.center, groups)
+						self.animation_player.create_particles('1',sprite.rect.center, groups)
 
 
 

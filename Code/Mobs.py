@@ -41,7 +41,7 @@ class Enemy(Entity):
         self.attack_cooldown = 400
         self.damage_player = damage_player
         self.trigger_death_particles = trigger_death_particles
-        self.trigger_damage = trigger_damage
+        self.trigger_render_number = trigger_damage
         self.add_exp = add_exp
 
         # invincibility timer
@@ -117,7 +117,7 @@ class Enemy(Entity):
                 self.health -= player.get_full_weapon_damage()
             else:
                 self.health -= player.get_full_magic_damage()
-            self.trigger_damage(self.rect.midtop,player.get_full_magic_damage(),'red')
+            self.trigger_render_number(self.rect.midtop,player.get_full_magic_damage(),'red')
             self.hit_time = pygame.time.get_ticks()
             self.vulnerable = False
 
@@ -125,7 +125,7 @@ class Enemy(Entity):
         if self.health <= 0:
             self.kill()
             # self.trigger_death_particles(self.rect.center, self.monster_name)
-            self.trigger_damage(self.rect.midtop, self.exp, 'green')
+            self.trigger_render_number(self.rect.midtop, self.exp, 'green')
             self.add_exp(self.exp)
 
     def hit_reaction(self):

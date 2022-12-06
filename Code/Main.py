@@ -4,10 +4,10 @@ from level import Level
 from debug import debug_mode
 
 
+pygame.init()
 
 class Game:
     def __init__(self):
-        pygame.init()
         self.screen = pygame.display.set_mode((0,0),pygame.FULLSCREEN | pygame.DOUBLEBUF)
         self.clock = pygame.time.Clock()
         self.level = Level()
@@ -25,7 +25,7 @@ class Game:
 
             self.level.run()
             debug_mode(self)
-            pygame.display.update()
+            pygame.display.flip()
             self.clock.tick(FPS)
             self.screen.fill('black')
 

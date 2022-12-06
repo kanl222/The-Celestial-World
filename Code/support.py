@@ -37,7 +37,7 @@ def import_folder_base64_Animation(img_list):
     return surface_list
 
 
-def import_folder_base64_Icon(img):
+def import_folder_base64_image(img):
     return pygame.image.load(
         io.BytesIO(base64.b64decode(img.encode('utf-8')))).convert_alpha()
 
@@ -54,11 +54,17 @@ def import_folder_json():
                     continue
                 data = simplejson.loads(file)
                 for i in data:
-                    if data[i]['Animation'] is None and not data[i]['Icon'] is None:
-                        pass
-                    elif not data[i]['Animation'] is None and not data[i]['Icon'] is None:
-                        data[i]['Animation'] = import_folder_base64_Animation(
-                            data[i]['Animation'])
+                    try:
+                        keys = data[i].keys()
+                        if 'Sprite' in keys:
+                            data[i]['Sprite'] = import_folder_base64_image(data[i]['Sprite'])
+                        if 'Icon' in keys:
+                            data[i]['Icon'] = import_folder_base64_image(data[i]['Icon'])
+                        if 'Animation' in keys:
+                            data[i]['Animation'] = import_folder_base64_Animation(
+                                data[i]['Animation'])
+                    except Exception as e:
+                        print(e,i)
                 res.append(data)
         files[name] = res
     return files

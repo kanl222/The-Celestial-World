@@ -1,17 +1,18 @@
 import json
 import base64
 import os
-import timeit
-import io
-import pygame
+import  re
 from tkinter import filedialog
 
 
 def Animation(src: str):
     images_list = []
-    for img in os.listdir(src):
+    files = os.listdir(src)
+    files.sort(key=lambda f: int(re.sub('\D', '', f)))
+    print(files)
+    for count,img in enumerate(files):
         image = open('{}/{}'.format(src, img), 'rb')
-        images_list.append(base64.b64encode(image.read()).decode('utf-8'))
+        images_list.append([count,base64.b64encode(image.read()).decode('utf-8')])
     return images_list
 
 def Image(src):
@@ -19,11 +20,6 @@ def Image(src):
         return base64.b64encode(image.read()).decode('utf-8')
 
 
-StaticObjectForm = {
-               "Type_Object": "static_object",
-               "Name": 22,
-               "sprite": Image(filedialog.askopenfile())
-           }
 
 
 
@@ -47,6 +43,7 @@ def AddMagic():
     path = "../Json/Magic.json"
     MagicForm = {
         "Name": "Flame",
+        "Type": "Attack",
         "Mana": 20,
         "Damage": 20,
         "Cooldown": 10,
@@ -57,9 +54,14 @@ def AddMagic():
     }
     Add(MagicForm,path)
 
-def AddObject(form):
+def AddObject():
     path = "../Json/Object.json"
-    Add(form,path)
+    StaticObjectForm = {
+        "Type_Object": "static_object",
+        "Name": 22,
+        "Sprite": Image(filedialog.askopenfile())
+    }
+    Add(StaticObjectForm,path)
 
 AddMagic()
 

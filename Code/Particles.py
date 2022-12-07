@@ -52,8 +52,6 @@ class NumberRender(pygame.sprite.Sprite):
         self.animation_speed = 0.8
         ui_font = 'Serif'
         self.font = pygame.font.SysFont(ui_font, 20,True)
-        print(number)
-        print('+' if number > 0 else '-' + str(number))
         self.image = self.font.render(f'-{number}' if number > 0 else f'+{number}', True, color)
         self.rect = self.image.get_rect(midtop=(pos[0], pos[1] - 10))
 

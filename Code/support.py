@@ -24,11 +24,12 @@ def import_folder(path):
     return surface_list
 
 
-def import_folder_base64_Animation(img_list):
+def import_folder_base64_Animation(img_list:list):
     surface_list = []
+    img_list.sort(key=lambda x: x[0])
     for image in img_list:
         image_surf = pygame.image.load(
-            io.BytesIO(base64.b64decode(image.encode('utf-8')))).convert_alpha()
+            io.BytesIO(base64.b64decode(image[1].encode('utf-8')))).convert_alpha()
         if image_surf.get_size() <= (64, 64):
             image_surf = pygame.transform.scale(image_surf,
                                                 (image_surf.get_size()[0] * 3,
@@ -52,6 +53,7 @@ def import_folder_json():
                 if not file:
                     res.append([])
                     continue
+                print(name)
                 data = simplejson.loads(file)
                 for i in data:
                     try:

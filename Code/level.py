@@ -8,7 +8,7 @@ from Particles import Animation
 from Mobs import Enemy
 from Weapon import Weapon
 from threading import Thread
-from Object.Object_ import Object
+from Object_ import Object_
 
 from UI import UI
 
@@ -30,10 +30,10 @@ class Level:
 
         # sprite setup
         self.load_map()
-        self.Object_sprites = Object
+        self.Object_sprites = Object_
         self.data = import_folder_json()
         self.data_object = self.data['Object'][0]
-        print(self.data_object)
+        self.data_magic = self.data['Magic'][0]
         self.create_map(location)
 
         #particle

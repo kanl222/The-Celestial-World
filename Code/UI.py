@@ -2,13 +2,11 @@ import pygame
 from Sitting import *
 ui_font = 'serif'
 pygame.font.init()
-font = pygame.font.Font(None,30)
 
 
 class UI:
     def __init__(self):
         self.display_surface = pygame.display.get_surface()
-        self.font = pygame.font.Font(UI_FONT, UI_FONT_SIZE)
 
         # bar setup
         health_bar_width, bar_heigth = 430, 28
@@ -25,7 +23,7 @@ class UI:
 
 
     def indicator(self, current, max_amount,bg_rect):
-        indicator_text = pygame.font.SysFont(ui_font, 20).render(f'{current}/{max_amount}', True,
+        indicator_text = pygame.font.SysFont(ui_font, 20).render(f'{int(current)}/{int(max_amount)}', True,
                                                              'white')
         indicator_rect = indicator_text.get_rect(center=(bg_rect.center))
         return self.display_surface.blit(indicator_text,indicator_rect)

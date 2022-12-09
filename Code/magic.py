@@ -1,22 +1,22 @@
-import pygame
+import pygame as pg
 from Sitting import *
 from random import randint
 
 
-class MagicPlayer:
+class Magic:
 	def __init__(self,animation_player):
 		self.animation_player = animation_player
 
 
 	def Direction(self,player):
 		if player.status.split('_')[0] == 'Right':
-			return pygame.math.Vector2(1, 0)
+			return pg.math.Vector2(1, 0)
 		elif player.status.split('_')[0] == 'Left':
-			return pygame.math.Vector2(-1, 0)
+			return pg.math.Vector2(-1, 0)
 		elif player.status.split('_')[0] == 'Up':
-			return pygame.math.Vector2(0, -1)
+			return pg.math.Vector2(0, -1)
 		else:
-			return pygame.math.Vector2(0, 1)
+			return pg.math.Vector2(0, 1)
 
 
 
@@ -27,7 +27,7 @@ class MagicPlayer:
 			self.animation_player.create_particles('aura',player.rect.center,groups)
 			self.animation_player.create_particles('heal',player.rect.center,groups)
 
-	def flame(self,player,cost,groups):
+	def LineMagic(self,id_magic,player,cost,groups):
 		if player.energy >= cost:
 			player.energy -= cost
 			direction = self.Direction(player)
@@ -37,22 +37,59 @@ class MagicPlayer:
 					offset_x = (direction.x * i) * TILESIZE
 					x = player.rect.centerx + offset_x
 					y = player.rect.centery + 24
-					self.animation_player.create_particles('Flame',(x,y),groups)
+					self.animation_player.create_particles(id_magic,(x,y),groups)
 				else: # vertical
 					offset_y = (direction.y * i) * TILESIZE
 					x = player.rect.centerx
 					y = player.rect.centery + offset_y
-					self.animation_player.create_particles('Flame',(x,y),groups)
+					self.animation_player.create_particles(id_magic,(x,y),groups)
 
-	def Magiccirle(self, player, cost:int, groups:list):
+	def OnEnemyMagic(self,id_magic, player, cost, groups):
 		if player.energy >= cost:
-			for sprite in groups[0]:
-				if sprite.__class__.__name__ == 'Enemy':
+			for sprite in [sprite for sprite in groups[0] if player.EntityVector2().distance_to(pg.math.Vector2(sprite.rect.center)) <= 400 if sprite.__class__.__name__ == 'Enemy']:
+				if player.energy >= cost:
 					player.energy -= cost
-					enemy_vec = pygame.math.Vector2(sprite.rect.center)
-					player_vec = pygame.math.Vector2(player.rect.center)
-					if (player_vec - enemy_vec).magnitude() <= 400:
-						self.animation_player.create_particles('1',sprite.rect.center, groups)
+					self.animation_player.create_particles(id_magic,sprite.rect.center, groups)
+
+
+	def BulletMagic(self,id_magic, player, cost, groups):
+		Bullet(player,groups)
+
+
+
+class Bullet(pg.sprite.Sprite):
+	def __init__(self,player,groups):
+		super().__init__(groups)
+		self.sprite_type = 'magic'
+		self.image = pg.Surface((30, 40))
+		self.image.fill('red')
+		self.player = player
+		self.speed = 5
+		self.rect = self.image.get_rect(center=player.rect.center)
+		self.direction = self.Direction(self.player)
+		self.hit_time = pg.time.get_ticks()
+
+	def Direction(self,player):
+		if player.status.split('_')[0] == 'Right':
+			return pg.math.Vector2(1, 0)
+		elif player.status.split('_')[0] == 'Left':
+			return pg.math.Vector2(-1, 0)
+		elif player.status.split('_')[0] == 'Up':
+			return pg.math.Vector2(0, -1)
+		else:
+			return pg.math.Vector2(0, 1)
+
+	def collision(self):
+		self.kill()
+
+	def update(self) -> None:
+		current_time = pg.time.get_ticks()
+		if current_time - self.hit_time >= 2000:
+			self.collision()
+		self.rect.x += self.direction.x * self.speed
+		self.rect.y += self.direction.y * self.speed
+
+
 
 
 

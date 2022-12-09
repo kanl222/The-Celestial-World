@@ -53,7 +53,6 @@ def import_folder_json():
                 if not file:
                     res.append([])
                     continue
-                print(name)
                 data = simplejson.loads(file)
                 for i in data:
                     try:

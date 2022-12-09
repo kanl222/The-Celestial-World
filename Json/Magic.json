@@ -1,12 +1,13 @@
 {
-  "1": {
+  "1": {"data": {
     "Name": "Flame",
     "Type": "Attack",
     "Mana": 20,
     "Damage": 20,
-    "Cooldown": 10,
+    "Cooldown": 100,
     "Rang": 0,
-    "Up_level_magic": 5,
+    "Up_level_magic": 5
+  },
     "Icon": "iVBORw0KGgoAAAANSUhEUgAAABcAAAAgCAYAAAD5VeO1AAABMElEQVR4nO2UrQ7CMBDHb4SQoBCTuKmRJZvcDAaH40VwU3uAKRwvMofDYEDSZAE1h0SglswUw20Fem0hEAQ71VzX3/3vY2dxzuFb1vkauYW38Bb+AziLA+N9Yf3fbjEpjxGcAukCvK3cX+wt3TdG8CKvIJuOnlQWeaV819WBs+mIO15PejdbHZTqlaOIakV4kVdaKNrLNXe8nvGPZAz3Exf8xIXh5AIAHxhFWfp2FIKfuAAA0iYbwzGAbCrQx+KAU1lo4aiOpcfah+fxvKzLJDNyFEU1OC3n7e7mGdx8pVKYFM7igDeKBuTj05q+I+GiYfNQtR2FYEf3ZaJWgbTm2Cw7CmufeBaDqoxs6GbZf/I9BsDSUSMpheN8i6k3zaSDGcExQJFXwNIjnLc7JYhabFfmnXla//0F0AAAAABJRU5ErkJggg==",
     "Animation": [
       [

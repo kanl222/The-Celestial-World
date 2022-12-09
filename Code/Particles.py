@@ -3,9 +3,9 @@ from random import choice
 import pygame.freetype
 
 
-class Animation:
+class Particle:
     def __init__(self, frames):
-        self.frames = frames[0]
+        self.frames = frames
 
     def reflect_images(self, frames):
         return [pygame.transform.flip(x, True, False) for x in frames]
@@ -16,7 +16,7 @@ class Animation:
     def create_particles(self, animation_type, pos, groups):
         ParticleEffect(pos, self.frames[animation_type]['Animation'], groups)
 
-    def create_number(self, pos: tuple, number: int, groups: list,color=None):
+    def create_number(self, pos, number, groups,color=None):
         NumberRender(pos, number, groups,color)
 
 
@@ -52,7 +52,7 @@ class NumberRender(pygame.sprite.Sprite):
         self.animation_speed = 0.8
         ui_font = 'Serif'
         self.font = pygame.font.SysFont(ui_font, 20,True)
-        self.image = self.font.render(f'-{number}' if number > 0 else f'+{number}', True, color)
+        self.image = self.font.render(f'{number}' if number > 0 else f'+{number}', True, color)
         self.rect = self.image.get_rect(midtop=(pos[0], pos[1] - 10))
 
     def animate(self):

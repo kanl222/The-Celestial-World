@@ -5,7 +5,7 @@ from support import import_folder
 from math import inf
 
 class Player(Entity):
-    def __init__(self,pos,groups,obstacle_sprites,create_attack,destroy_attack,create_magic):
+    def __init__(self,pos,groups,obstacle_sprites,create_attack,destroy_attack,create_magic,import_magic):
         super().__init__(groups)
         self.image = pygame.image.load(
             '../graphics/player/Down_idle/Down_ (1).png').convert_alpha()
@@ -21,27 +21,17 @@ class Player(Entity):
         self.obstacle_sprites = obstacle_sprites
 
         self.create_magic = create_magic
-        self.magic_index = -1
-        self.magic = list(magic_data.keys())[self.magic_index]
+        self.import_magic = import_magic
+        self.magic_index = '1'
+        self.magic_data = self.import_magic(['1'])
+        print(self.magic_data)
+        self.magic = self.magic_data[self.magic_index]
         self.can_switch_magic = True
         self.magic_switch_time = None
         self.attack_magic = True
         self.attacking = False
 
-        self.stats = {'health': 100, 'energy': 300, 'attack': 10, 'magic': 4, 'speed': 5}
-        self.max_stats = {'health': 100, 'energy': 300, 'attack': 20, 'magic': 10,
-                          'speed': 10}
-        self.upgrade_cost = {'health': 100, 'energy': 100, 'attack': 100, 'magic': 100,
-                             'speed': 100}
-        self.health = self.stats['health']
-        self.energy = self.stats['energy']
-        self.buff_damage = []
-        self.buff_health = []
-        self.buff_energy = [100]
-        self.exp = 0
-        self.level = 0
-        self.xp_before_up_level = 100
-        self.speed = self.stats['speed']
+        self.player_data()
 
         self.vulnerable = True
         self.hurt_time = None
@@ -56,6 +46,24 @@ class Player(Entity):
 
         for animation in self.animations.keys():
             self.animations[animation] = import_folder(character_path + animation)
+
+    def player_data(self,PlayerData=None):
+        if PlayerData is None:
+            self.stats = {'health': 100, 'energy': 300, 'attack': 10, 'magic': 4,
+                          'speed': 5}
+            self.max_stats = {'health': 100, 'energy': 300, 'attack': 20, 'magic': 10,
+                              'speed': 10}
+            self.upgrade_cost = {'health': 100, 'energy': 100, 'attack': 100,
+                                 'magic': 100,
+                                 'speed': 100}
+            self.health = self.stats['health']
+            self.energy = self.stats['energy']
+            self.exp = 0
+            self.level = 0
+            self.xp_before_up_level = 100
+            self.speed = self.stats['speed']
+        else:
+            pass
 
 
     def input(self):
@@ -85,11 +93,10 @@ class Player(Entity):
                 self.attacking = True
                 self.attack_magic = False
                 self.attack_time = pygame.time.get_ticks()
-                style = list(magic_data.keys())[self.magic_index]
-                strength = list(magic_data.values())[self.magic_index]['strength']
-
-                cost = list(magic_data.values())[self.magic_index]['cost']
-                self.create_magic(style, strength, cost)
+                type = self.magic["Type"]
+                name = self.magic["Name"]
+                cost = self.magic["Mana"]
+                self.create_magic(self.magic_index,type,name,cost)
 
     def get_status(self):
 
@@ -126,7 +133,7 @@ class Player(Entity):
         current_time = pygame.time.get_ticks()
 
         if self.attacking:
-            if current_time - self.attack_time >= magic_data[self.magic]['cooldown']:
+            if current_time - self.attack_time >= self.magic['Cooldown']:
                 self.attacking = False
                 self.attack_magic = True
 
@@ -148,7 +155,7 @@ class Player(Entity):
 
     def get_full_magic_damage(self):
         base_damage = self.stats['magic']
-        spell_damage = magic_data[self.magic]['strength']
+        spell_damage =  self.magic['Damage']
         return base_damage + spell_damage
 
     def get_value_by_index(self, index):
@@ -170,4 +177,5 @@ class Player(Entity):
         self.cooldowns()
         self.get_status()
         self.animate()
+        self.energy_recovery()
         self.move(self.stats['speed'])

@@ -1,14 +1,14 @@
 import pygame
-from support import import_folder_json,import_csv_layout
+from support import import_folder_json, import_csv_layout
 from Sitting import *
-from tile import Tile
 from Player import Player
-from magic import MagicPlayer
-from Particles import Animation
+from magic import Magic
+from Particles import Particle
 from Mobs import Enemy
 from Weapon import Weapon
 from threading import Thread
 from Object_ import Object_
+from NPC import NoPlayChatcter
 
 from UI import UI
 
@@ -30,15 +30,15 @@ class Level:
 
         # sprite setup
         self.load_map()
-        self.Object_sprites = Object_
+        self.Object_sprites = Object_()
         self.data = import_folder_json()
         self.data_object = self.data['Object'][0]
         self.data_magic = self.data['Magic'][0]
         self.create_map(location)
 
-        #particle
-        self.animation = Animation(self.data['Magic'])
-        self.magic_player = MagicPlayer(self.animation)
+        # particle
+        self.animation = Particle(self.data_magic)
+        self.magic_player = Magic(self.animation)
 
         self.ui = UI()
 
@@ -48,9 +48,7 @@ class Level:
             'object': import_csv_layout('../csv/object.csv')
         }
 
-
-
-    def create_map(self,location):
+    def create_map(self, location):
         for style, layout in self.layouts.items():
             for row_index, row in enumerate(layout):
                 for col_index, col in enumerate(row):
@@ -62,9 +60,16 @@ class Level:
                                 self.player = Player(
                                     (x, y),
                                     [self.visible_sprites],
-                                    self.obstacle_sprites,self.create_attack,self.destroy_attack,self.create_magic)
+                                    self.obstacle_sprites, self.create_attack,
+                                    self.destroy_attack, self.create_magic,
+                                    self.import_magic)
                             elif col in self.data_object.keys():
-                                self.Object_sprites.AddStaticObject('',self.data_object[col],(x, y),[self.visible_sprites,self.obstacle_sprites])
+                                self.Object_sprites.AddStaticObject(self.data_object[col],
+                                                                    (x, y),
+                                                                    [self.visible_sprites,
+                                                                     self.obstacle_sprites])
+                            elif col == '8':
+                                NoPlayChatcter((x,y),'dds',[self.visible_sprites])
                             else:
                                 if col == '113':
                                     monster_name = 'squid'
@@ -73,7 +78,7 @@ class Level:
                                 Enemy(
                                     monster_name,
                                     (x, y),
-                                    [self.visible_sprites,self.attackable_sprites],
+                                    [self.visible_sprites, self.attackable_sprites],
                                     self.obstacle_sprites,
                                     self.damage_player,
                                     self.trigger_number,
@@ -81,7 +86,8 @@ class Level:
                                     self.add_exp)
 
     def create_attack(self):
-        self.current_attack = Weapon(self.player,[self.visible_sprites, self.attack_sprites])
+        self.current_attack = Weapon(self.player,
+                                     [self.visible_sprites, self.attack_sprites])
 
     def delete_map(self):
         for sprite in self.obstacle_sprites:
@@ -104,8 +110,12 @@ class Level:
                                                                 self.attackable_sprites,
                                                                 False)
                 if collision_sprites:
+                    if attack_sprite.__class__.__name__ == 'Bullet': attack_sprite.collision()
                     for target_sprite in collision_sprites:
-                            target_sprite.get_damage(self.player,attack_sprite.sprite_type)
+                        target_sprite.get_damage(self.player, attack_sprite.sprite_type)
+
+    def import_magic(self, list_id_magic):
+        return {id: self.data_magic[id]['data'] for id in list_id_magic}
 
     def damage_player(self, amount, attack_type):
         if self.player.vulnerable:
@@ -116,33 +126,31 @@ class Level:
     def trigger_death_particles(self, pos, particle_type):
         self.animation.create_particles(particle_type, pos, self.visible_sprites)
 
-    def trigger_number(self,rect,number,color):
-        self.animation.create_number(rect,number,[self.visible_sprites],color)
+    def trigger_number(self, rect, number, color):
+        self.animation.create_number(rect, number, [self.visible_sprites], color)
 
     def add_exp(self, amount):
-
         self.player.exp += amount
 
-    def create_magic(self, style, strength, cost):
-        magic = {"support":{
+    def create_magic(self,id_magic,type,name, cost):
+        magic = {"support": {
             'heal': self.magic_player.heal},
-            "Attack":{
-            'flame': self.magic_player.flame,
-            'Magiccirle': self.magic_player.Magiccirle
+            "Attack": {
+                'Flame': self.magic_player.OnEnemyMagic
             }
         }
 
-        magic['Attack'][style](self.player, cost,[self.visible_sprites,self.attack_sprites])
-
+        magic[type][name](id_magic,self.player, cost,[self.visible_sprites, self.attack_sprites])
 
     def Update_UI(self):
         self.ui.display(self.player)
 
     def run(self):
         self.visible_sprites.custom_draw(self.player)
-        Thread(target=self.Update_UI ,daemon=True).run()
+        Thread(target=self.Update_UI, daemon=True).run()
         self.visible_sprites.update()
         self.visible_sprites.enemy_update(self.player)
+        self.visible_sprites.npc_update(self.player)
         self.player_attack_logic()
 
 
@@ -153,39 +161,44 @@ class YSortCameraGroup(pygame.sprite.Group):
         self.display_surface = pygame.display.get_surface()
         self.half_width = self.display_surface.get_size()[0] // 2
         self.half_height = self.display_surface.get_size()[1] // 2
-        self.distance_w =  self.display_surface.get_width()//2 + 160
+        self.distance_w = self.display_surface.get_width() // 2 + 160
         self.distance_h = self.display_surface.get_height() // 2 + 160
         self.offset = pygame.math.Vector2()
+        self.creating_floor()
 
 
         # creating the floor
+    def creating_floor(self):
         self.floor_surf = pygame.image.load(
             '../graphics/level 1.png').convert_alpha()
         self.floor_rect = self.floor_surf.get_rect(topleft=(0, 0))
         self.floor_surf = pygame.transform.scale(self.floor_surf,
-                                                 (self.floor_surf.get_size()[0]*3,self.floor_surf.get_size()[1]*3 ))
+                                                 (self.floor_surf.get_size()[0] * 3,
+                                                  self.floor_surf.get_size()[1] * 3))
 
-    def custom_draw(self, player:Player):
+    def custom_draw(self, player: Player):
         self.offset.x = player.rect.centerx - self.half_width
         self.offset.y = player.rect.centery - self.half_height
 
         floor_offset_pos = self.floor_rect.topleft - self.offset
         self.display_surface.blit(self.floor_surf, floor_offset_pos)
         sprites = [sprite for sprite in self.sprites()
-                if player.EntityVector2().distance_to(pygame.math.Vector2(sprite.rect.center)) <= self.distance_w
-                if abs(player.EntityVector2().y - pygame.math.Vector2(sprite.rect.center).y) <= self.distance_h]
+                   if player.EntityVector2().distance_to(
+                pygame.math.Vector2(sprite.rect.center)) <= self.distance_w
+                   if abs(player.EntityVector2().y - pygame.math.Vector2(
+                sprite.rect.center).y) <= self.distance_h]
         self.count_sprite_updates = len(sprites)
         for sprite in sorted(sprites, key=lambda sprite: sprite.rect.midbottom[1]):
-                offset_pos = sprite.rect.topleft - self.offset
-                self.display_surface.blit(sprite.image, offset_pos)
+            offset_pos = sprite.rect.topleft - self.offset
+            self.display_surface.blit(sprite.image, offset_pos)
 
-
-
-    def enemy_update(self, player:Player):
+    def enemy_update(self, player: Player):
         enemy_sprites = [sprite for sprite in self.sprites() if
-                         hasattr(sprite, 'sprite_type') and sprite.sprite_type == 'enemy'
-                         if (player.EntityVector2() - sprite.EntityVector2()).magnitude() <= 500]
+                         hasattr(sprite, 'sprite_type') and sprite.sprite_type == 'enemy']
         for enemy in enemy_sprites:
             enemy.enemy_update(player)
-            pygame.draw.rect(self.display_surface, (255, 0, 0), enemy.rect, 2)
 
+    def npc_update(self, player: Player):
+        npc_sprites = [sprite for sprite in self.sprites() if hasattr(sprite, 'sprite_type') and sprite.sprite_type == 'npc']
+        for npc in npc_sprites:
+            npc.npc_update(player)

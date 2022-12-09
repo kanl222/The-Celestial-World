@@ -27,7 +27,7 @@ class Entity(sprite.Sprite):
                         self.hitbox.bottom = sprite.hitbox.top
                     if self.direction.y < 0:  # moving up
                         self.hitbox.top = sprite.hitbox.bottom
-            return
+
         if direction == 'horizontal':
             for sprite in self.obstacle_sprites:
                 if sprite.hitbox.colliderect(self.hitbox):
@@ -35,7 +35,6 @@ class Entity(sprite.Sprite):
                         self.hitbox.right = sprite.hitbox.left
                     if self.direction.x < 0:  # moving left
                         self.hitbox.left = sprite.hitbox.right
-            return
 
 
     def EntityVector2(self) -> math.Vector2:

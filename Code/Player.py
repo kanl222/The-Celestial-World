@@ -1,7 +1,7 @@
 import pygame
 from Sitting import *
-from entity import Entity
-from support import import_folder
+from Entity import Entity
+from Support import import_folder
 from math import inf
 
 class Player(Entity):
@@ -22,10 +22,10 @@ class Player(Entity):
 
         self.create_magic = create_magic
         self.import_magic = import_magic
-        self.magic_index = '1'
-        self.magic_data = self.import_magic(['1'])
-        print(self.magic_data)
-        self.magic = self.magic_data[self.magic_index]
+        self.magic_index = 0
+        self.magic_data = self.import_magic(['2','1'])
+        self.magic_list = list( self.magic_data.keys())
+        self.magic = self.magic_data[self.magic_list[self.magic_index]]
         self.can_switch_magic = True
         self.magic_switch_time = None
         self.attack_magic = True
@@ -33,6 +33,7 @@ class Player(Entity):
 
         self.player_data()
 
+        self.flag_moving = True
         self.vulnerable = True
         self.hurt_time = None
         self.invulnerability_duration = 500
@@ -68,7 +69,9 @@ class Player(Entity):
 
     def input(self):
         keys = pygame.key.get_pressed()
-
+        if not self.flag_moving:
+            self.direction.xy = (0,0)
+            return None
         if keys[pygame.K_UP]:
             self.direction.y = -1
             self.status = 'Up'
@@ -93,10 +96,14 @@ class Player(Entity):
                 self.attacking = True
                 self.attack_magic = False
                 self.attack_time = pygame.time.get_ticks()
-                type = self.magic["Type"]
-                name = self.magic["Name"]
+                type = self.magic["Type"].split('_')
                 cost = self.magic["Mana"]
-                self.create_magic(self.magic_index,type,name,cost)
+                self.create_magic(self.magic_list[self.magic_index],type[0],type[1],cost)
+
+        if keys[pygame.K_1]:
+            self.magic_index = (self.magic_index + 1) % len(self.magic_list)
+            self.magic = self.magic_data[self.magic_list[self.magic_index]]
+
 
     def get_status(self):
 

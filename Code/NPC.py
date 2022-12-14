@@ -1,5 +1,5 @@
 import pygame as pg
-from entity import Entity
+from Entity import Entity
 from DialogSystem import DialogSystem
 
 class NoPlayChatcter(Entity):
@@ -13,6 +13,9 @@ class NoPlayChatcter(Entity):
         self.rect = self.image.get_rect(bottomleft=pos)
         self.dialog = DialogSystem()
         self.mes = f'{self.name}: Кто ты?'
+        self.choise = {1: "Привет как дела?",2: "Ты кто",3:"Уйти"}
+        self.flag_dialog_selection = False
+
 
     def shop(self):
         pass
@@ -28,6 +31,7 @@ class NoPlayChatcter(Entity):
         if player.EntityVector2().distance_to(pg.math.Vector2(self.rect.center)) <= 100:
             self.dialog.message_ = self.mes
             if keys[pg.K_SPACE]:
-                self.dialog.speak_ = (self.mes)
+                player.flag_moving = False
+                self.dialog.speak_ = (self.choise)
                 self.mes = f'{self.name}:Как дела????'
             self.dialog.update()

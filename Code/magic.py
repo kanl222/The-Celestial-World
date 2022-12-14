@@ -53,41 +53,9 @@ class Magic:
 
 
 	def BulletMagic(self,id_magic, player, cost, groups):
-		Bullet(player,groups)
+		self.animation_player.creat_bullet_magic(id_magic,self.Direction(player),player.rect.center,groups)
 
 
-
-class Bullet(pg.sprite.Sprite):
-	def __init__(self,player,groups):
-		super().__init__(groups)
-		self.sprite_type = 'magic'
-		self.image = pg.Surface((30, 40))
-		self.image.fill('red')
-		self.player = player
-		self.speed = 5
-		self.rect = self.image.get_rect(center=player.rect.center)
-		self.direction = self.Direction(self.player)
-		self.hit_time = pg.time.get_ticks()
-
-	def Direction(self,player):
-		if player.status.split('_')[0] == 'Right':
-			return pg.math.Vector2(1, 0)
-		elif player.status.split('_')[0] == 'Left':
-			return pg.math.Vector2(-1, 0)
-		elif player.status.split('_')[0] == 'Up':
-			return pg.math.Vector2(0, -1)
-		else:
-			return pg.math.Vector2(0, 1)
-
-	def collision(self):
-		self.kill()
-
-	def update(self) -> None:
-		current_time = pg.time.get_ticks()
-		if current_time - self.hit_time >= 2000:
-			self.collision()
-		self.rect.x += self.direction.x * self.speed
-		self.rect.y += self.direction.y * self.speed
 
 
 

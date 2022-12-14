@@ -1,11 +1,10 @@
 import pygame
-from support import import_folder_json, import_csv_layout
+from Support import import_folder_json, import_csv_layout
 from Sitting import *
 from Player import Player
-from magic import Magic
+from Magic import Magic
 from Particles import Particle
-from Mobs import Enemy
-from Weapon import Weapon
+from Enemy import Enemy
 from threading import Thread
 from Object_ import Object_
 from NPC import NoPlayChatcter
@@ -136,7 +135,8 @@ class Level:
         magic = {"support": {
             'heal': self.magic_player.heal},
             "Attack": {
-                'Flame': self.magic_player.OnEnemyMagic
+                'OnEnemyMagic': self.magic_player.OnEnemyMagic,
+                'Bullet': self.magic_player.BulletMagic
             }
         }
 
@@ -202,3 +202,5 @@ class YSortCameraGroup(pygame.sprite.Group):
         npc_sprites = [sprite for sprite in self.sprites() if hasattr(sprite, 'sprite_type') and sprite.sprite_type == 'npc']
         for npc in npc_sprites:
             npc.npc_update(player)
+
+

@@ -1,18 +1,28 @@
 import pygame as pg
 
-class EffectsList(list):
-    def __init__(self,entity):
+
+class EffectsList( pg.sprite.Group):
+    def __init__(self):
         super().__init__()
-        self.entity = entity
 
-    def update(self):
-        [i.update(self.entity) for i in self]
+    def update(self,entity):
+        [sprite.update(entity) for sprite in self.sprites()]
+
+    def __repr__(self):
+        return f"{[sprite for sprite in self.sprites()]}"
+
+    def __str__(self):
+        return f"{[sprite for sprite in self.sprites()]}"
 
 
-class Effect:
-    def __init__(self, power_effect, duration_effect):
-        self.power = power_effect
-        self.duration = duration_effect
+
+class Effect(pg.sprite.Sprite):
+    def __init__(self, data):
+        super(Effect, self).__init__()
+        self.power = data['power']
+        self.duration = data['duration']
+        self.icon = data["icon"]
+        self.rect = self.icon.get_rect()
         self.start_time = pg.time.get_ticks()
 
     def __repr__(self):
@@ -20,37 +30,35 @@ class Effect:
 
 
 class Ignition(Effect):
-    def __init__(self,power_effect,duration_effect):
-        super(Ignition, self).__init__(power_effect,duration_effect)
+    """Дебаф воспламенение"""
+    def __init__(self,data:dict):
+        super(Ignition, self).__init__(data)
 
     def update(self,entity):
         print(entity)
 
-class Weaken(Effect):
-    def __init__(self, power_effect, duration_effect):
-        super(Weaken, self).__init__(power_effect, duration_effect)
+class Weakness(Effect):
+    """Дебаф слабость"""
+    def __init__(self, data:dict):
+        super(Weakness, self).__init__(data)
 
     def update(self,entity):
         print(entity)
+        self.kill()
 
 class Blind(Effect):
-    def __init__(self, power_effect, duration_effect):
-        super(Blind, self).__init__(power_effect, duration_effect)
+    def __init__(self,data:dict):
+        super(Blind, self).__init__(data)
 
     def update(self,entity):
         print(entity)
 
 class Regeneration(Effect):
-    def __init__(self, power_effect, duration_effect):
-        super(Regeneration, self).__init__(power_effect, duration_effect)
+    def __init__(self, data:dict):
+        super(Regeneration, self).__init__(data)
 
     def update(self,entity):
         print(entity)
 
-effect = EffectsList(1)
-effect.append(Weaken(1,1))
-effect.append(Weaken(1,1))
-effect.append(Weaken(1,1))
-print(effect)
-
+print(EffectsList.__name__)
 

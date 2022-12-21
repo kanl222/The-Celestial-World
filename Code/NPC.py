@@ -1,29 +1,41 @@
 import pygame as pg
 from Entity import Entity
 from DialogSystem import DialogSystem
+import json
 
 class NoPlayChatcter(Entity):
-    def __init__(self,pos,type_npc,groups):
+    def __init__(self,pos,data_npc=None,groups=None):
         super().__init__(groups)
         self.sprite_type = 'npc'
-        self.type_npc = type_npc
-        self.name = 'Куб'
-        self.image = pg.Surface((30, 40))
-        self.image.fill('red')
+        if data_npc is not None:
+            self.data_npc = data_npc
+            self.name = self.data_npc['Name']
+            self.image = self.data_npc['Sprite']
+            self.dialogs = self.import_dialog()
+        else:
+            self.name = 'Куб'
+            self.image = pg.Surface((30, 40))
+            self.image.fill('red')
         self.rect = self.image.get_rect(bottomleft=pos)
         self.dialog = DialogSystem()
         self.mes = f'{self.name}: Кто ты?'
         self.choise = {1: "Привет как дела?",2: "Ты кто",3:"Уйти"}
         self.flag_dialog_selection = False
+        print(self.image.get_size(),23)
+
+
+    def import_dialog(self):
+            with open(f"../data/dialogs/{self.name}.json", 'r') as file_:
+                file = file_.read()
+                if not file:
+                    return {}
+                return json.loads(file)
 
 
     def shop(self):
         pass
 
     def quest(self):
-        pass
-
-    def update(self):
         pass
 
     def npc_update(self,player):

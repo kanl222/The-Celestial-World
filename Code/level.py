@@ -30,9 +30,10 @@ class Level:
         # sprite setup
         self.load_map()
         self.Object_sprites = Object_()
-        self.data = import_folder_json()
-        self.data_object = self.data['Object'][0]
-        self.data_magic = self.data['Magic'][0]
+        data = import_folder_json()
+        self.data_object = data['Object'][0]
+        self.data_magic = data['Magic'][0]
+        self.data_npc = data['NPC'][0]
         self.create_map(location)
 
         # particle
@@ -44,11 +45,13 @@ class Level:
     def load_map(self):
         self.layouts = {
             'map': import_csv_layout('../csv/map.csv'),
-            'object': import_csv_layout('../csv/object.csv')
+            'object': import_csv_layout('../csv/object.csv'),
+            'npc': import_csv_layout('../csv/npc.csv')
         }
 
     def create_map(self, location):
         for style, layout in self.layouts.items():
+            if style == 'map': continue
             for row_index, row in enumerate(layout):
                 for col_index, col in enumerate(row):
                     if col != '-1':
@@ -67,8 +70,6 @@ class Level:
                                                                     (x, y),
                                                                     [self.visible_sprites,
                                                                      self.obstacle_sprites])
-                            elif col == '8':
-                                NoPlayChatcter((x,y),'dds',[self.visible_sprites])
                             else:
                                 if col == '113':
                                     monster_name = 'squid'
@@ -83,13 +84,16 @@ class Level:
                                     self.trigger_number,
                                     self.trigger_death_particles,
                                     self.add_exp)
+                        elif style == 'npc':
+                            if col not in self.data_npc.keys():continue
+                            NoPlayChatcter((x, y), self.data_npc[col], [self.visible_sprites])
 
     def create_attack(self):
         self.current_attack = Weapon(self.player,
                                      [self.visible_sprites, self.attack_sprites])
 
     def delete_map(self):
-        for sprite in self.obstacle_sprites:
+        for sprite in self.visible_sprites:
             if sprite.__class__ != 'Player':
                 sprite.kill()
         location = 2

@@ -69,6 +69,7 @@ def import_folder_json():
                         if 'Animation' in keys:
                             data[i]['Animation'] = import_folder_base64_Animation(
                                 data[i]['Animation'])
+
                     except Exception as e:
                         print(e,i)
                 res.append(data)

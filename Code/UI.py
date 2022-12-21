@@ -9,6 +9,7 @@ class UI:
         self.display_surface = pygame.display.get_surface()
 
         # bar setup
+        self.screen_size = self.width,self.heigth = self.display_surface.get_size()
         health_bar_width, bar_heigth = 430, 28
         self.health_bar_rect = pygame.Rect(150, 44, health_bar_width, bar_heigth)
         self.energy_bar_rect = pygame.Rect(150, 94, 360, 28)
@@ -38,6 +39,12 @@ class UI:
         current_rect.width = current_width
         pygame.draw.rect(self.display_surface, color, current_rect)
 
+    def selection_box(self, left, top):
+        bg_rect = pygame.Rect(left, top, ITEM_BOX_SIZE, ITEM_BOX_SIZE)
+        pygame.draw.rect(self.display_surface, UI_BG_COLOR, bg_rect)
+        pygame.draw.rect(self.display_surface, UI_BORDER_COLOR, bg_rect, 3)
+        return bg_rect
+
     def Update(self):
         pass
 
@@ -51,6 +58,9 @@ class UI:
         self.indicator(player.health, player.stats['health'], self.health_bar_rect)
         self.indicator(player.energy, player.stats['energy'], self.energy_bar_rect)
         self.create_text_level(player.level,self.image)
+        self.selection_box(100,self.heigth-100)
+        self.selection_box(100, self.heigth - 190)
+        self.selection_box(100, self.heigth - 280)
 
 
 

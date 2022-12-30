@@ -3,7 +3,6 @@ from Sitting import *
 ui_font = 'serif'
 pygame.font.init()
 
-
 class UI:
     def __init__(self):
         self.display_surface = pygame.display.get_surface()
@@ -42,11 +41,17 @@ class UI:
     def selection_box(self, left, top):
         bg_rect = pygame.Rect(left, top, ITEM_BOX_SIZE, ITEM_BOX_SIZE)
         pygame.draw.rect(self.display_surface, UI_BG_COLOR, bg_rect)
-        pygame.draw.rect(self.display_surface, UI_BORDER_COLOR, bg_rect, 3)
+        pygame.draw.rect(self.display_surface, '#c0c0c0', bg_rect, 3)
         return bg_rect
 
-    def Update(self):
-        pass
+    def magic_overlay(self,player):
+        bg_rect = self.selection_box(80, self.heigth - 120)
+        magic_surf = player.magic['Icon']
+        magic_surf = pygame.transform.scale(magic_surf,(ITEM_BOX_SIZE-10,ITEM_BOX_SIZE-10))
+        magic_rect = magic_surf.get_rect(center=bg_rect.center)
+
+        self.display_surface.blit(magic_surf, magic_rect)
+
 
     def display(self,player):
         #topleft
@@ -58,10 +63,7 @@ class UI:
         self.indicator(player.health, player.stats['health'], self.health_bar_rect)
         self.indicator(player.energy, player.stats['energy'], self.energy_bar_rect)
         self.create_text_level(player.level,self.image)
-        self.selection_box(100,self.heigth-100)
-        self.selection_box(100, self.heigth - 190)
-        self.selection_box(100, self.heigth - 280)
-
+        self.magic_overlay(player)
 
 
 

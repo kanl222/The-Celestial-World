@@ -8,6 +8,7 @@ from Enemy import Enemy
 from threading import Thread
 from Object_ import Object_
 from NPC import NoPlayChatcter
+from ScreenEffect import Darking, Dark_screen, ScreenEffectList
 
 from UI import UI
 
@@ -17,10 +18,12 @@ class Level:
         # get the display surface
         self.display_surface = pygame.display.get_surface()
 
+        # screen effect
+        self.screen_effect = ScreenEffectList()
+
         # sprite group setup
         self.visible_sprites = YSortCameraGroup()
         self.obstacle_sprites = pygame.sprite.Group()
-        location = 1
 
         # attack sprites
         self.current_attack = None
@@ -31,10 +34,17 @@ class Level:
         self.load_map()
         self.Object_sprites = Object_()
         data = import_folder_json()
-        self.data_object = data['Object'][0]
-        self.data_magic = data['Magic'][0]
-        self.data_npc = data['NPC'][0]
-        self.create_map(location)
+        self.data_object = data['Object']
+        self.data_magic = data['Magic']
+        self.data_npc = data['NPC']
+        self.player = Player(
+            (0, 0),
+            [self.visible_sprites],
+            self.obstacle_sprites, self.create_attack,
+            self.destroy_attack, self.trigger_death_player, self.create_magic,
+            self.import_magic)
+        self.create_map()
+        print(data)
 
         # particle
         self.animation = Particle(self.data_magic)
@@ -46,10 +56,10 @@ class Level:
         self.layouts = {
             'map': import_csv_layout('../csv/map.csv'),
             'object': import_csv_layout('../csv/object.csv'),
-            'npc': import_csv_layout('../csv/npc.csv')
+            'entity': import_csv_layout('../csv/entity.csv')
         }
 
-    def create_map(self, location):
+    def create_map(self):
         for style, layout in self.layouts.items():
             if style == 'map': continue
             for row_index, row in enumerate(layout):
@@ -58,23 +68,22 @@ class Level:
                         x = col_index * TILESIZE
                         y = row_index * TILESIZE
                         if style == 'object':
-                            if col == '108':
-                                self.player = Player(
-                                    (x, y),
-                                    [self.visible_sprites],
-                                    self.obstacle_sprites, self.create_attack,
-                                    self.destroy_attack, self.create_magic,
-                                    self.import_magic)
-                            elif col in self.data_object.keys():
+                            if col in self.data_object.keys():
                                 self.Object_sprites.AddStaticObject(self.data_object[col],
                                                                     (x, y),
                                                                     [self.visible_sprites,
                                                                      self.obstacle_sprites])
+                        elif style == 'entity':
+                            if col == '0':
+                                self.player.change_pos((x, y))
+                            elif col in self.data_npc.keys():
+                                NoPlayChatcter((x, y), self.data_npc[col],
+                                               [self.visible_sprites])
                             else:
                                 if col == '113':
-                                    monster_name = 'squid'
+                                    monster_name = 'slime'
                                 else:
-                                    monster_name = 'squid'
+                                    monster_name = 'slime'
                                 Enemy(
                                     monster_name,
                                     (x, y),
@@ -84,22 +93,20 @@ class Level:
                                     self.trigger_number,
                                     self.trigger_death_particles,
                                     self.add_exp)
-                        elif style == 'npc':
-                            if col not in self.data_npc.keys():continue
-                            NoPlayChatcter((x, y), self.data_npc[col], [self.visible_sprites])
+        self.screen_effect.add(Darking())
 
     def create_attack(self):
         self.current_attack = Weapon(self.player,
                                      [self.visible_sprites, self.attack_sprites])
 
-    def delete_map(self):
-        for sprite in self.visible_sprites:
-            if sprite.__class__ != 'Player':
-                sprite.kill()
-        location = 2
-        self.visible_sprites = YSortCameraGroup()
+    def load(self):
+        [sprite.kill() for sprite in self.visible_sprites if
+         sprite.__class__.__name__ != 'Player']
         self.obstacle_sprites = pygame.sprite.Group()
-        self.create_map(location)
+        self.current_attack = None
+        self.attack_sprites = pygame.sprite.Group()
+        self.attackable_sprites = pygame.sprite.Group()
+        self.create_map()
 
     def destroy_attack(self):
         if self.current_attack:
@@ -122,9 +129,15 @@ class Level:
 
     def damage_player(self, amount, attack_type):
         if self.player.vulnerable:
-            self.player.health -= amount
-            self.player.vulnerable = False
-            self.player.hurt_time = pygame.time.get_ticks()
+            self.player.get_damage(amount)
+
+    def death_player(self):
+        if not self.screen_effect and not self.player.living:
+            self.player.revival()
+            self.load()
+
+    def trigger_death_player(self):
+        self.screen_effect.add(Darking(True), Dark_screen())
 
     def trigger_death_particles(self, pos, particle_type):
         self.animation.create_particles(particle_type, pos, self.visible_sprites)
@@ -135,7 +148,7 @@ class Level:
     def add_exp(self, amount):
         self.player.exp += amount
 
-    def create_magic(self,id_magic,type,name, cost):
+    def create_magic(self, id_magic, type, name, cost):
         magic = {"support": {
             'heal': self.magic_player.heal},
             "Attack": {
@@ -144,18 +157,21 @@ class Level:
             }
         }
 
-        magic[type][name](id_magic,self.player, cost,[self.visible_sprites, self.attack_sprites])
+        magic[type][name](id_magic, self.player, cost,
+                          [self.visible_sprites, self.attack_sprites])
 
     def Update_UI(self):
         self.ui.display(self.player)
 
     def run(self):
         self.visible_sprites.custom_draw(self.player)
-        Thread(target=self.Update_UI, daemon=True).run()
         self.visible_sprites.update()
         self.visible_sprites.enemy_update(self.player)
         self.visible_sprites.npc_update(self.player)
+        self.Update_UI()
         self.player_attack_logic()
+        self.death_player()
+        self.screen_effect.update(self.display_surface)
 
 
 class YSortCameraGroup(pygame.sprite.Group):
@@ -170,8 +186,8 @@ class YSortCameraGroup(pygame.sprite.Group):
         self.offset = pygame.math.Vector2()
         self.creating_floor()
 
-
         # creating the floor
+
     def creating_floor(self):
         self.floor_surf = pygame.image.load(
             '../graphics/level 1.png').convert_alpha()
@@ -203,8 +219,7 @@ class YSortCameraGroup(pygame.sprite.Group):
             enemy.enemy_update(player)
 
     def npc_update(self, player: Player):
-        npc_sprites = [sprite for sprite in self.sprites() if hasattr(sprite, 'sprite_type') and sprite.sprite_type == 'npc']
+        npc_sprites = [sprite for sprite in self.sprites() if
+                       hasattr(sprite, 'sprite_type') and sprite.sprite_type == 'npc']
         for npc in npc_sprites:
             npc.npc_update(player)
-
-

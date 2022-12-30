@@ -6,26 +6,26 @@ from Debug import debug_mode
 
 pygame.init()
 
+def terminate():
+    pygame.quit()
+    sys.exit()
+
 class Game:
     def __init__(self):
-        self.screen = pygame.display.set_mode((0,0),pygame.FULLSCREEN | pygame.DOUBLEBUF)
+        self.screen = pygame.display.set_mode((1280,720), pygame.DOUBLEBUF)
         self.clock = pygame.time.Clock()
         self.level = Level()
 
         main_sound = pygame.mixer.Sound('../Music/es_barefoot-adventures.mp3')
         main_sound.set_volume(0.1)
         main_sound.play(loops=-1)
+        pygame.mouse.set_visible(False)
 
     def run(self):
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE:
-                        pygame.quit()
-                        sys.exit()
+                    terminate()
             self.level.run()
             debug_mode(self)
             pygame.display.flip()

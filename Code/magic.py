@@ -53,7 +53,9 @@ class Magic:
 
 
 	def BulletMagic(self,id_magic, player, cost, groups):
-		self.animation_player.creat_bullet_magic(id_magic,self.Direction(player),player.rect.center,groups)
+		if player.energy >= cost:
+			player.energy -= cost
+			self.animation_player.creat_bullet_magic(id_magic,self.Direction(player),player.rect.center,groups)
 
 
 

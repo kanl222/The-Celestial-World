@@ -12,5 +12,5 @@ class StaticObject(pygame.sprite.Sprite):
                                                  self.image.get_size()[1] * 3))
         print(self.image.get_size())
         self.rect = self.image.get_rect(bottomleft=pos)
-        self.hitbox = self.rect.inflate(-40, -170)
+        self.hitbox = self.rect.inflate(-40, -200)
         self.hitbox.midbottom = self.rect.midbottom

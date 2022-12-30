@@ -20,7 +20,7 @@ class Particle:
         Bullet(direction, pos, self.frames[animation_type]['Animation'], groups)
 
     def create_number(self, pos, number, groups, color=None):
-        NumberRender(pos, number, groups, color)
+        MoveNumberRender(pos, number, groups, color)
 
 
 class ParticleEffect(pg.sprite.Sprite):
@@ -45,17 +45,17 @@ class ParticleEffect(pg.sprite.Sprite):
         self.animate()
 
 
-class NumberRender(pg.sprite.Sprite):
-    def __init__(self, pos: tuple, number: int, groups: list, color='white'):
+class MoveNumberRender(pg.sprite.Sprite):
+    def __init__(self, pos: tuple, number: str, groups: list, color='white'):
         super().__init__(groups)
         self.display_surface = pygame.display.get_surface()
         self.sprite_type = 'DamageIndicator'
         self.queue = 4
         self.moving_y = 0
-        self.animation_speed = 0.8
+        self.animation_speed = 1.2
         ui_font = 'Serif'
         self.font = pygame.font.SysFont(ui_font, 20, True)
-        self.image = self.font.render(f'{number}' if number > 0 else f'+{number}', True,
+        self.image = self.font.render(number, True,
                                       color)
         self.rect = self.image.get_rect(midtop=(pos[0], pos[1] - 10))
 
@@ -68,6 +68,8 @@ class NumberRender(pg.sprite.Sprite):
 
     def update(self):
         self.animate()
+
+
 
 
 class Bullet(pg.sprite.Sprite):

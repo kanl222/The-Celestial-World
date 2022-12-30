@@ -52,11 +52,10 @@ def import_folder_json():
     filename = ['Object', 'Item', 'Magic', 'NPC', 'Enemy']
     files = {}
     for name in filename:
-        res = []
-        with open("../Json/{}.json".format(name), 'r') as f1:
+        with open("../data/{}.json".format(name), 'r') as f1:
                 file = f1.read()
                 if not file:
-                    res.append([])
+                    data = {}
                     continue
                 data = simplejson.loads(file)
                 for i in data:
@@ -64,7 +63,9 @@ def import_folder_json():
                         keys = data[i].keys()
                         if 'Sprite' in keys:
                             data[i]['Sprite'] = import_folder_base64_image(data[i]['Sprite'])
-                        if 'Icon' in keys:
+                        if 'Icon' in data[i]['data'].keys():
+                            data[i]['data']['Icon'] = import_folder_base64_image(data[i]['data']['Icon'])
+                        if 'Icon' in data[i].keys():
                             data[i]['Icon'] = import_folder_base64_image(data[i]['Icon'])
                         if 'Animation' in keys:
                             data[i]['Animation'] = import_folder_base64_Animation(
@@ -72,6 +73,5 @@ def import_folder_json():
 
                     except Exception as e:
                         print(e,i)
-                res.append(data)
-        files[name] = res
+        files[name] = data
     return files

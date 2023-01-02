@@ -1,5 +1,5 @@
 import pygame
-from Sitting import *
+from sitting import *
 ui_font = 'serif'
 pygame.font.init()
 

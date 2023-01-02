@@ -1,7 +1,7 @@
 import pygame
 import pygame as pg
-from Entity import Entity
-from DialogSystem import DialogSystem
+from entity import Entity
+from dialog_system import DialogSystem
 
 class NoPlayChatcter(Entity):
     def __init__(self,pos,data_npc=None,groups=None):
@@ -16,6 +16,7 @@ class NoPlayChatcter(Entity):
             self.image = pg.Surface((30, 40))
             self.image.fill('red')
         self.rect = self.image.get_rect(bottomleft=pos)
+        self.hitbox = self.rect.inflate(0, -10)
         self.dialog = DialogSystem(self.name)
         self.flag_dialog_selection = False
 

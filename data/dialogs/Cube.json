@@ -1,0 +1,22 @@
+{
+  "1": {
+    "type": "speaking",
+    "text": ["Привет, я Декард"],
+    "farther": 2
+  },
+  "2": {
+    "type": "choice",
+    "variants": {"1": ["Пока","3"],
+                 "2": ["Пока","4"]}
+  },
+  "3": {
+    "type": "speaking",
+    "text": ["Привет, я Декард"],
+    "farther": "Exit"
+  },
+  "4": {
+    "type": "speaking",
+    "text": ["Привет, я Декард"],
+    "farther": "Exit"
+  }
+}

@@ -1,8 +1,8 @@
 import random
 import pygame
-from Sitting import *
-from Entity import Entity
-from Support import *
+from sitting import *
+from entity import Entity
+from support import *
 
 
 class Enemy(Entity):

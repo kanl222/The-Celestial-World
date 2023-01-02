@@ -1,9 +1,9 @@
 import pygame
-from Sitting import *
-from Entity import Entity
-from Support import import_folder
+from sitting import *
+from entity import Entity
+from support import import_folder
 from math import inf
-from Effects import EffectsList
+from effects import EffectsList
 
 
 class Player(Entity):
@@ -50,7 +50,7 @@ class Player(Entity):
 
     def change_pos(self,pos):
         self.rect = self.image.get_rect(topleft=pos)
-        self.hitbox = self.rect.inflate(0, -10)
+        self.hitbox = self.rect.inflate(0, -30)
 
 
     def import_player_assets(self):
@@ -75,7 +75,7 @@ class Player(Entity):
             self.upgrade_cost = {'health': 50, 'energy': 50}
             self.health = self.stats['health']
             self.energy = self.stats['energy']
-            self.effects_list = EffectsList()
+            self.effects = EffectsList()
             self.count_money = 0
             self.exp = 0
             self.level = 0
@@ -83,9 +83,10 @@ class Player(Entity):
             self.xp_before_up_level = 100
             self.speed = self.stats['speed']
         else:
-            self.stats = PlayerData['stats']
-            self.max_stats = PlayerData['max_stats']
+            self.character = PlayerData['character']
+            self.start_stats = PlayerData['start_stats']
             self.upgrade_cost = PlayerData['upgrade_cost']
+            self.update_stats()
             self.health = self.stats['health']
             self.energy = self.stats['energy']
             self.effects_list = EffectsList()
@@ -150,16 +151,15 @@ class Player(Entity):
                 self.trigger_death()
 
     def revival(self):
-        if not self.living:
-            self.living = not self.living
-            self.health = self.stats['health']
-            self.energy = self.stats['energy']
+        self.living = not self.living
+        self.health = self.stats['health']
+        self.energy = self.stats['energy']
 
 
     def get_status(self):
 
         # idle status
-        if self.direction.x == 0 and self.direction.y == 0:
+        if (self.direction.x == 0 and self.direction.y == 0) or not self.living:
             if not 'idle' in self.status and not 'attack' in self.status:
                 self.status = self.status + '_idle'
 
@@ -226,12 +226,21 @@ class Player(Entity):
         else:
             self.energy = self.stats['energy']
 
+    def hitbox_(self):
+        pygame.draw.rect(self.image, 'red', self.hitbox,2)
+
     def update(self):
-        if self.flag_moving and  self.living:
+        if self.flag_moving and self.living:
             self.input()
-            self.cooldowns()
-            self.get_status()
-            self.animate()
-            self.energy_recovery()
-            self.update_level()
-            self.move(self.stats['speed'])
+        else:
+            self.direction = pygame.math.Vector2()
+        self.cooldowns()
+        self.get_status()
+        self.animate()
+        self.energy_recovery()
+        self.update_level()
+        self.move(self.stats['speed'])
+
+
+
+        self.hitbox_()

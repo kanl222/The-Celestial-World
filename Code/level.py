@@ -1,16 +1,16 @@
 import pygame
-from Support import import_folder_json, import_csv_layout
-from Sitting import *
-from Player import Player
-from Magic import Magic
-from Particles import Particle
-from Enemy import Enemy
+from support import import_folder_json, import_csv_layout
+from sitting import *
+from player import Player
+from magic import Magic
+from particles import Particle
+from enemy import Enemy
 from threading import Thread
-from Object_ import Object_
-from NPC import NoPlayChatcter
-from ScreenEffect import Darking, Dark_screen, ScreenEffectList
+from object_ import Object_
+from npc import NoPlayChatcter
+from screen_effect import Darking, Dark_screen, ScreenEffectList
 
-from UI import UI
+from ui import UI
 
 
 class Level:
@@ -211,12 +211,22 @@ class YSortCameraGroup(pygame.sprite.Group):
         for sprite in sorted(sprites, key=lambda sprite: sprite.rect.midbottom[1]):
             offset_pos = sprite.rect.topleft - self.offset
             self.display_surface.blit(sprite.image, offset_pos)
+            self.hitbox_(sprite)
+
+
+    def hitbox_(self,sprite):
+        try:
+            pygame.draw.rect(self.display_surface, 'red', sprite.hitbox,2)
+        except Exception:
+            pass
 
     def enemy_update(self, player: Player):
         enemy_sprites = [sprite for sprite in self.sprites() if
                          hasattr(sprite, 'sprite_type') and sprite.sprite_type == 'enemy']
         for enemy in enemy_sprites:
             enemy.enemy_update(player)
+
+
 
     def npc_update(self, player: Player):
         npc_sprites = [sprite for sprite in self.sprites() if

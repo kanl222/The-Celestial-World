@@ -1,7 +1,7 @@
 import pygame, sys
-from Sitting import FPS
-from Level import Level
-from Debug import debug_mode
+from sitting import FPS
+from level import Level
+from debug import debug_mode
 
 
 pygame.init()

@@ -17,13 +17,8 @@ class EffectsList(pg.sprite.Group):
     def __mul__(self, other):
         return other * (sum(self) + 1)
 
-    def __rmul__(self, other):
-        return other * (sum(self) + 1)
-
-    def __imul__(self, other):
-        return other * (sum(self) + 1)
-
-
+    __imul__ = __mul__
+    __rmul__ = __mul__
 
 class Effect(pg.sprite.Sprite):
     def __init__(self, data):
@@ -45,8 +40,7 @@ class Effect(pg.sprite.Sprite):
 
     def update_duration(self):
         current_time = pg.time.get_ticks()
-        if current_time - self.start_time >= self.duration:
-            self.kill()
+        if current_time - self.start_time >= self.duration: self.kill()
 
 class Strength(Effect):
     def __init__(self, data:dict):

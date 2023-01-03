@@ -192,10 +192,6 @@ class YSortCameraGroup(pygame.sprite.Group):
         self.floor_surf = pygame.image.load(
             '../graphics/level 1.png').convert_alpha()
         self.floor_rect = self.floor_surf.get_rect(topleft=(0, 0))
-        self.floor_surf = pygame.transform.scale(self.floor_surf,
-                                                 (self.floor_surf.get_size()[0] * 3,
-                                                  self.floor_surf.get_size()[1] * 3))
-
     def custom_draw(self, player: Player):
         self.offset.x = player.rect.centerx - self.half_width
         self.offset.y = player.rect.centery - self.half_height

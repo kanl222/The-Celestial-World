@@ -59,9 +59,9 @@ class Enemy(Entity):
         for animation in self.animations.keys():
             self.animations[animation] = import_folder(main_path + animation)
 
-    def get_distance_direction(self, pos):
-        enemy_vec = pygame.math.Vector2(self.rect.center)
-        player_vec = pygame.math.Vector2(pos)
+    def get_distance_direction(self, entity:Entity):
+        enemy_vec = self.EntityVector2()
+        player_vec = entity.EntityVector2()
         distance = (player_vec - enemy_vec).magnitude()
 
         if distance > 0:
@@ -71,7 +71,7 @@ class Enemy(Entity):
         return (distance, direction)
 
     def get_status(self, player):
-        distance = self.get_distance_direction(player.rect.center)[0]
+        distance = self.get_distance_direction(player)[0]
 
         if distance <= self.attack_radius and self.can_attack:
             if self.status != 'attack':

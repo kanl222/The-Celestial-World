@@ -8,8 +8,7 @@ import simplejson
 
 def import_csv_layout(path):
     with open(path) as level_map:
-        layout = reader(level_map, delimiter=',')
-        return [list(row) for row in layout]
+        return [list(row) for row in reader(level_map, delimiter=',')]
 
 
 def import_folder(path):
@@ -49,28 +48,26 @@ def import_folder_base64_image(img):
 
 
 def import_folder_json():
-    filename = ['Object', 'Item', 'Magic', 'NPC', 'Enemy']
+    filename = ['Object', 'Item', 'Magic', 'NPC', 'Enemy','Player']
     files = {}
     for name in filename:
+        data = {}
         with open("../data/{}.json".format(name), 'r') as f1:
                 file = f1.read()
-                if not file:
-                    data = {}
-                    continue
+                if not file: continue
                 data = simplejson.loads(file)
                 for i in data:
                     try:
                         keys = data[i].keys()
-                        if 'Sprite' in keys:
-                            data[i]['Sprite'] = import_folder_base64_image(data[i]['Sprite'])
-                        if 'Icon' in data[i]['data'].keys():
-                            data[i]['data']['Icon'] = import_folder_base64_image(data[i]['data']['Icon'])
-                        if 'Icon' in data[i].keys():
-                            data[i]['Icon'] = import_folder_base64_image(data[i]['Icon'])
-                        if 'Animation' in keys:
-                            data[i]['Animation'] = import_folder_base64_Animation(
-                                data[i]['Animation'])
-
+                        if 'sprite' in keys:
+                            data[i]['sprite'] = import_folder_base64_image(data[i]['sprite'])
+                        if 'data' in data[i].keys():
+                            data[i]['data']['icon'] = import_folder_base64_image(data[i]['data']['icon'])
+                        if 'icon' in data[i].keys():
+                            data[i]['icon'] = import_folder_base64_image(data[i]['icon'])
+                        if 'animation' in keys:
+                            data[i]['animation'] = import_folder_base64_Animation(
+                                data[i]['animation'])
                     except Exception as e:
                         print(e,i)
         files[name] = data

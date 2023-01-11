@@ -1,12 +1,17 @@
-import pygame
+import pygame as pg
 
 
-class StaticObject(pygame.sprite.Sprite):
+class StaticObject(pg.sprite.Sprite):
     def __init__(self,data, pos, groups):
         super().__init__(groups)
-        self.display_surface = pygame.display.get_surface()
-        self.image = data['Sprite']
-
-        self.rect = self.image.get_rect(bottomleft=pos)
-        self.hitbox = self.rect.inflate(-40, -200)
-        self.hitbox.midbottom = self.rect.midbottom
+        if not data:
+            self.image = pg.Surface((64,64))
+            self.rect = self.image.get_rect(bottomleft=pos)
+            self.hitbox = self.rect.inflate(0,0)
+            self.sprite_type = 'invisible'
+        else:
+            self.image = data['sprite']
+            self.rect = self.image.get_rect(bottomleft=pos)
+            self.hitbox = self.rect.inflate(*data['hitbox_offset'])
+            self.sprite_type = 'object'
+        self.hitbox.center = self.rect.center

@@ -1,6 +1,6 @@
 import pygame as pg
 from random import choice
-import pygame.freetype
+
 
 
 class Particle:
@@ -8,16 +8,16 @@ class Particle:
         self.frames = frames
 
     def reflect_images(self, frames):
-        return [pygame.transform.flip(x, True, False) for x in frames]
+        return [pg.transform.flip(x, True, False) for x in frames]
 
     def create_grass_particles(self, pos, groups):
         ParticleEffect(pos, choice(self.frames['leaf']), groups)
 
     def create_particles(self, animation_type, pos, groups):
-        ParticleEffect(pos, self.frames[animation_type]['Animation'], groups)
+        ParticleEffect(pos, self.frames[animation_type]['animation'], groups)
 
     def creat_bullet_magic(self, animation_type, direction, pos, groups):
-        Bullet(direction, pos, self.frames[animation_type]['Animation'], groups)
+        Bullet(direction, pos, self.frames[animation_type]['animation'], groups)
 
     def create_number(self, pos, number, groups, color=None):
         MoveNumberRender(pos, number, groups, color)
@@ -26,7 +26,7 @@ class Particle:
 class ParticleEffect(pg.sprite.Sprite):
     def __init__(self, pos, animation_frames, groups):
         super().__init__(groups)
-        self.sprite_type = 'magic'
+        self.sprite_type = 'particle'
         self.queue = 2
         self.frame_index = 0
         self.animation_speed = 0.15
@@ -48,13 +48,13 @@ class ParticleEffect(pg.sprite.Sprite):
 class MoveNumberRender(pg.sprite.Sprite):
     def __init__(self, pos: tuple, number: str, groups: list, color='white'):
         super().__init__(groups)
-        self.display_surface = pygame.display.get_surface()
-        self.sprite_type = 'DamageIndicator'
+        self.display_surface = pg.display.get_surface()
+        self.sprite_type = 'particle'
         self.queue = 4
         self.moving_y = 0
         self.animation_speed = 1.2
         ui_font = 'Serif'
-        self.font = pygame.font.SysFont(ui_font, 20, True)
+        self.font = pg.font.SysFont(ui_font, 20, True)
         self.image = self.font.render(number, True,
                                       color)
         self.rect = self.image.get_rect(midtop=(pos[0], pos[1] - 10))
@@ -75,7 +75,7 @@ class MoveNumberRender(pg.sprite.Sprite):
 class Bullet(pg.sprite.Sprite):
     def __init__(self, direction, pos, animation_frames, groups):
         super().__init__(groups)
-        self.sprite_type = 'magic'
+        self.sprite_type = 'particle'
         self.speed = 10
         self.frame_index = 0
         self.animation_speed = 0.15
@@ -92,7 +92,7 @@ class Bullet(pg.sprite.Sprite):
         """rotate a Surface, maintaining position."""
 
         loc = image.get_rect().center  # rot_image is not defined
-        rot_sprite = pygame.transform.rotate(image, angle).convert_alpha()
+        rot_sprite = pg.transform.rotate(image, angle).convert_alpha()
         rot_sprite.get_rect().center = loc
         return rot_sprite
 

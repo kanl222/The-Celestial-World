@@ -1,7 +1,5 @@
 import pygame
-from sitting import *
-ui_font = 'serif'
-pygame.font.init()
+from config import *
 
 class UI:
     def __init__(self):
@@ -12,21 +10,33 @@ class UI:
         health_bar_width, bar_heigth = 430, 28
         self.health_bar_rect = pygame.Rect(150, 44, health_bar_width, bar_heigth)
         self.energy_bar_rect = pygame.Rect(150, 94, 360, 28)
-        self.image = pygame.image.load('../graphics/interface2.png').convert_alpha()
+        self.image = pygame.image.load('../graphics/interface.png').convert_alpha()
         self.rect = self.image.get_rect(topleft=(10, 10))
+        self.font = pygame.font.SysFont('sans-serif', 30)
+        self.ColorTextShadow='black'
+        self.ColorText='#F8F9FB'
 
-    def create_text_level(self, level,rect):
-        Level_text = pygame.font.SysFont(ui_font, 64).render(str(level), True,
-                                                             'white')
-        Level_text_rect = Level_text.get_rect(center=(180//2,rect.get_size()[1]//2 + 5))
-        return self.display_surface.blit(Level_text, Level_text_rect)
+    def create_center_text(self,screen, x=0, y=0,font=pygame.font.Font(None,30), text=''):
+        Level_text_shadow = font.render(text, True, self.ColorTextShadow)
+        Level_text_rect_shadow = Level_text_shadow.get_rect(
+            center=(x + 1, y + 1))
+        Level_text = font.render(text, True, self.ColorText)
+        Level_text_rect = Level_text.get_rect(center=(x, y))
+        screen.blit(Level_text_shadow, Level_text_rect_shadow)
+        screen.blit(Level_text, Level_text_rect)
+
+    def create_text_level(self, level):
+        font = pygame.font.Font(None, 78)
+        text = font.render(str(level), True,COLOR_FONT)
+        text_rect = text.get_rect(center=(90,self.rect.h//2+10))
+        self.display_surface.blit(text, text_rect)
 
 
     def indicator(self, current, max_amount,bg_rect):
-        indicator_text = pygame.font.SysFont(ui_font, 20).render(f'{int(current)}/{int(max_amount)}', True,
-                                                             'white')
+        font = pygame.font.Font(UI_FONT, 18)
+        indicator_text = font.render(f'{int(current)}/{int(max_amount)}', True,COLOR_FONT)
         indicator_rect = indicator_text.get_rect(center=(bg_rect.center))
-        return self.display_surface.blit(indicator_text,indicator_rect)
+        self.display_surface.blit(indicator_text,indicator_rect)
 
 
     def show_bar(self, current, max_amount, bg_rect, color):
@@ -41,14 +51,18 @@ class UI:
     def selection_box(self, left, top):
         bg_rect = pygame.Rect(left, top, ITEM_BOX_SIZE, ITEM_BOX_SIZE)
         pygame.draw.rect(self.display_surface, UI_BG_COLOR, bg_rect)
-        pygame.draw.rect(self.display_surface, '#c0c0c0', bg_rect, 3)
+        pygame.draw.rect(self.display_surface, UI_BORDER_COLOR, bg_rect, 3)
+        x,y=bg_rect.topleft
+        pygame.draw.rect(self.display_surface, '#8c8c8c',(x+1, y+1, bg_rect.w - 2, bg_rect.h - 2), 1)
+        pygame.draw.rect(self.display_surface, '#404040',(x+3, y+3, bg_rect.w - 3, bg_rect.h - 3), 1)
         return bg_rect
 
     def magic_overlay(self,player):
-        bg_rect = self.selection_box(80, self.heigth - 120)
-        magic_surf = player.magic['Icon']
+        bg_rect = self.selection_box(60, self.heigth - 120)
+        magic_surf = player.magic['icon']
         magic_surf = pygame.transform.scale(magic_surf,(ITEM_BOX_SIZE-10,ITEM_BOX_SIZE-10))
         magic_rect = magic_surf.get_rect(center=bg_rect.center)
+
 
         self.display_surface.blit(magic_surf, magic_rect)
 
@@ -62,7 +76,7 @@ class UI:
         self.display_surface.blit(self.image, self.rect)
         self.indicator(player.health, player.stats['health'], self.health_bar_rect)
         self.indicator(player.energy, player.stats['energy'], self.energy_bar_rect)
-        self.create_text_level(player.level,self.image)
+        self.create_text_level(player.level)
         self.magic_overlay(player)
 
 

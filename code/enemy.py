@@ -1,19 +1,19 @@
 import random
 import pygame
-from sitting import *
+from config import *
 from entity import Entity
 from support import *
 
 
 class Enemy(Entity):
-    def __init__(self, monster_name, pos, groups, obstacle_sprites, damage_player,trigger_damage,
+    def __init__(self, data, pos, groups, obstacle_sprites, damage_player,trigger_damage,
                  trigger_death, add_exp):
 
         # general setup
         super().__init__(groups)
         self.sprite_type = 'enemy'
         # graphics setup
-        self.import_graphics(monster_name)
+        self.import_graphics(data['name'])
         self.status = 'idle'
         self.image = self.animations[self.status][self.frame_index]
 
@@ -24,10 +24,10 @@ class Enemy(Entity):
         self.obstacle_sprites = obstacle_sprites
 
         # stats
-        self.monster_name = monster_name
-        monster_info = monster_data[self.monster_name]
-        self.health = monster_info['health']
+        self.monster_name = data['name']
         self.level = 1
+        monster_info = data
+        self.health = monster_info['health']
         self.exp = monster_info['exp']
         self.speed = monster_info['speed']
         self.attack_damage = monster_info['damage']
@@ -59,9 +59,9 @@ class Enemy(Entity):
         for animation in self.animations.keys():
             self.animations[animation] = import_folder(main_path + animation)
 
-    def get_distance_direction(self, entity:Entity):
+    def get_distance_direction(self, pos):
         enemy_vec = self.EntityVector2()
-        player_vec = entity.EntityVector2()
+        player_vec = pygame.math.Vector2(pos)
         distance = (player_vec - enemy_vec).magnitude()
 
         if distance > 0:
@@ -71,12 +71,13 @@ class Enemy(Entity):
         return (distance, direction)
 
     def get_status(self, player):
-        distance = self.get_distance_direction(player)[0]
+        distance = self.get_distance_direction(player.rect.center)[0]
 
         if distance <= self.attack_radius and self.can_attack:
             if self.status != 'attack':
                 self.frame_index = 0
             self.status = 'attack'
+            self.ignore_notice_radius = False
         elif distance <= self.notice_radius or self.ignore_notice_radius:
             self.status = 'move'
         else:
@@ -128,6 +129,7 @@ class Enemy(Entity):
                 self.health -= player.get_full_magic_damage()
             self.trigger_render_number(self.rect.midtop,str(-player.get_full_magic_damage()),'red')
             self.hit_time = pygame.time.get_ticks()
+            self.ignore_notice_radius = True
             self.vulnerable = False
 
     def check_death(self):

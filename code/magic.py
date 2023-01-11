@@ -1,5 +1,5 @@
 import pygame as pg
-from sitting import *
+from config import *
 from random import randint
 
 

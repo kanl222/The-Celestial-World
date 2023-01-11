@@ -1,0 +1,23 @@
+{
+  "player": {
+    "pos": [1600,1600],
+    "name": "kanl222",
+    "data": {
+      "species": "elf",
+      "character": {
+        "health": 4,
+        "energy": 6,
+        "power": 4,
+        "intelligence": 7,
+        "body_type": 5,
+        "dexterity": 7
+      },
+      "point_character": 5,
+      "count_money": 0,
+      "exp": 0,
+      "level": 1,
+      "energy_recovery_coef": 0.04,
+      "xp_before_up_level": 125
+    }
+  }
+}

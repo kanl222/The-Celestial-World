@@ -5,12 +5,6 @@ class EffectsList(pg.sprite.Group):
     def __init__(self):
         super().__init__()
 
-    def update(self,entity):
-        [sprite.update(entity) for sprite in self.sprites()]
-
-    def __repr__(self):
-        return f"{[sprite for sprite in self.sprites()]}"
-
     def __str__(self):
         return f"{[sprite for sprite in self.sprites()]}"
 
@@ -19,6 +13,7 @@ class EffectsList(pg.sprite.Group):
 
     __imul__ = __mul__
     __rmul__ = __mul__
+    __repr__ = __str__
 
 class Effect(pg.sprite.Sprite):
     def __init__(self, data):
@@ -26,7 +21,7 @@ class Effect(pg.sprite.Sprite):
         self.power = data['power']
         self.duration = data['duration']
         self.icon = data["icon"]
-        #self.rect = self.icon.get_rect()
+        self.rect = self.icon.get_rect()
         self.start_time = pg.time.get_ticks()
 
     def __repr__(self):
@@ -84,11 +79,14 @@ class Regeneration(Effect):
     def update(self,entity):
         self.duration()
 
-effect_ = Effect(data={'power':10,'duration':1000,'icon':10})
-effect_1 = Effect(data={'power':20,'duration':1000,'icon':10})
-effect_2 = Effect(data={'power':20,'duration':1000,'icon':10})
-effect_3 = Effect(data={'power':20,'duration':1000,'icon':10})
-list__ = EffectsList()
-list__.add(effect_,effect_1,effect_2,effect_3)
 
-print(300*list__)
+if __name__ == '__main__':
+
+    effect_ = Effect(data={'power':10,'duration':1000,'icon':10})
+    effect_1 = Effect(data={'power':20,'duration':1000,'icon':10})
+    effect_2 = Effect(data={'power':20,'duration':1000,'icon':10})
+    effect_3 = Effect(data={'power':20,'duration':1000,'icon':10})
+    list__ = EffectsList()
+    list__.add(effect_,effect_1,effect_2,effect_3)
+
+    print(300*list__)

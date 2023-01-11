@@ -159,7 +159,8 @@ class Player(Entity):
             self.upgrade_menu()
 
         if keys[pygame.K_ESCAPE] and self.can_pause_menu:
-            self.flag_pause_menu = not self.flag_upgrade_menu
+
+            self.flag_pause_menu = not self.flag_pause_menu
             self.can_pause_menu = False
             self.open_pause_menu_time = pygame.time.get_ticks()
             self.pause_menu()

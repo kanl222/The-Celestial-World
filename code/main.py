@@ -46,6 +46,7 @@ class Game:
                 elif event.type == RESUME:
                     self.level.resume()
                 elif event.type == EXITINMENU:
+                    self.set_visible_mouse(True)
                     self.frame = self.menu_
                 elif event.type == SAVEGAME:
                     self.level.save()

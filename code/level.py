@@ -201,11 +201,11 @@ class Level:
 
     def upgrade_menu(self):
         self.flag_upgrade_menu = not self.flag_upgrade_menu
-        self.set_visible_mouse(not pygame.mouse.get_visible())
+        self.set_visible_mouse(self.flag_upgrade_menu)
 
     def pause_menu(self):
         self.flag_pause_menu = not self.flag_pause_menu
-        self.set_visible_mouse(not pygame.mouse.get_visible())
+        self.set_visible_mouse(self.flag_pause_menu)
 
     def resume(self):
         if self.flag_pause_menu: return self.pause_menu()
@@ -232,7 +232,7 @@ class Level:
         self.visible_sprites.npc_update(self.player)
         self.player_attack_logic()
         self.death_player()
-        if self.flag_upgrade_menu: return self.upgrade.update(events)
+        if self.flag_upgrade_menu:  self.upgrade.update(events)
         self.screen_effect.update()
 
 

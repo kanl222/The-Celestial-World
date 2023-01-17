@@ -1,5 +1,6 @@
 import pygame, sys
-from config import *
+import config
+from config import UPGRADE_BG_COLOR_SELECTED
 from events import *
 from widget import Menu, ListButtons, button
 from sittings import SittingsMenu
@@ -16,9 +17,10 @@ win = pygame.display.set_mode((600, 600))
 
 class PauseMenu(Menu):
     def __init__(self):
-        super(PauseMenu, self).__init__((300, 300), WIDTH // 2, HEIGTH // 2)
+        width, height = config.sittings["width"], config.sittings['height']
+        super(PauseMenu, self).__init__((300, 300), width // 2, height // 2)
         self.buttons_main_menu = ListButtons()
-        self.background = pygame.Surface((WIDTH, HEIGTH), pygame.SRCALPHA)
+        self.background = pygame.Surface((width, height), pygame.SRCALPHA)
         self.background_rect = self.background.get_rect()
         self.background.fill('black')
         self.background.set_alpha(180)

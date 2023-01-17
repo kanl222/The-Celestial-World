@@ -1,8 +1,6 @@
 from importlib import __import__
 from support import load_config
 # game setup
-WIDTH    = 1280
-HEIGTH   = 720
 FPS      = 60
 TILESIZE = 64
 HITBOX_OFFSET = {

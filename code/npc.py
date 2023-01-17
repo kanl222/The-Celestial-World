@@ -2,6 +2,7 @@ import pygame
 import pygame as pg
 from entity import Entity
 from dialog import DialogSystem
+from support import import_image
 
 class NoPlayChatcter(Entity):
     def __init__(self,pos,data_npc=None,groups=None):
@@ -9,8 +10,7 @@ class NoPlayChatcter(Entity):
         self.sprite_type = 'npc'
         self.data_npc = data_npc
         self.name = self.data_npc['name']
-        self.image = pg.Surface((64,64))
-        self.image.fill('red')
+        self.image = import_image(f'../graphics/npc/{self.name}.png')
         self.rect = self.image.get_rect(bottomleft=pos)
         self.hitbox = self.rect.inflate(0, -10)
         self.dialog = DialogSystem(self.name)

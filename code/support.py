@@ -22,6 +22,10 @@ def import_folder(path):
 
     return surface_list
 
+def import_image(path):
+    image_surf = pygame.image.load(path).convert_alpha()
+    return image_surf
+
 
 def import_folder_base64_Animation(img_list:list):
     surface_list = []

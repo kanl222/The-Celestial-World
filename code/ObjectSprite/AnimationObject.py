@@ -10,7 +10,7 @@ class DestructibleObjtect(pygame.sprite.Sprite):
         self.animation_speed = 0.15
         self.frames = data['animation']
         self.image = self.frames[int(self.frame_index)]
-        self.rect = self.image.get_rect(bottomleft=pos)
+        self.rect = self.image.get_rect(topleft=pos)
         self.hitbox = self.rect.inflate(0, 0)
         self.hitbox.midbottom = self.rect.midbottom
 

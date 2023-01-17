@@ -1,5 +1,6 @@
 import pygame, sys
-from config import *
+import config
+from config import UI_BG_COLOR,translation
 import pygame_widgets
 from widget import button,ListButtons,Menu
 
@@ -8,7 +9,8 @@ from widget import button,ListButtons,Menu
 
 class Upgrade(Menu):
     def __init__(self,player):
-        super(Upgrade, self).__init__((500, 600),WIDTH // 4*3, HEIGTH // 2)
+        width, height = config.sittings["width"], config.sittings['height']
+        super(Upgrade, self).__init__((500, 600),width // 4*3, height // 2)
         self.player = player
         self.buttons = ListButtons()
         self.character = self.player.character

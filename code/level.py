@@ -64,10 +64,10 @@ class Level:
     def load_map(self):
 
         self.layouts = {
-            'boundary': import_csv_layout('../csv/floor_blocks.csv'),
-            'object': import_csv_layout('../csv/object.csv'),
-            'entity': import_csv_layout('../csv/entity.csv'),
-            'enemy': import_csv_layout('../csv/enemy.csv')
+            'boundary': import_csv_layout(f'../maps/{self.location}/_floor_blocks.csv'),
+            'object': import_csv_layout(f'../maps/{self.location}/_object.csv'),
+            'entity': import_csv_layout(f'../maps/{self.location}/_entity.csv'),
+            'enemy': import_csv_layout(f'../maps/{self.location}/_enemy.csv')
         }
 
     def create_map(self):
@@ -115,17 +115,19 @@ class Level:
             self.destroy_attack, self.trigger_death_player, self.create_magic,
             self.import_magic, self.upgrade_menu, self.pause_menu)
         if player_info is not None:
-            self.location = '1'
+            self.location = "1"
             self.player.player_name = player_info['name']
             self.player.load_data(data[player_info['species']], player_info['species'])
         else:
             self.load_player()
+        self.visible_sprites.creating_floor(self.location)
         self.load_map()
         self.create_map()
 
     def load_player(self):
         save_data = load_saves()
         self.flag_pos_player = True
+        self.location = save_data['player']['location']
         self.player.player_name = save_data['player']['name']
         self.player.load_data(save_data['player']['data'])
         self.player.change_pos(save_data['player']['pos'])
@@ -258,13 +260,12 @@ class YSortCameraGroup(pygame.sprite.Group):
         self.distance_w = self.display_surface.get_width() // 2 + 160
         self.distance_h = self.display_surface.get_height() // 2 + 160
         self.offset = pygame.math.Vector2()
-        self.creating_floor()
 
         # creating the floor
 
-    def creating_floor(self):
+    def creating_floor(self,location):
         self.floor_surf = pygame.image.load(
-            '../graphics/level 1.png').convert_alpha()
+            f'../maps/{location}/map.png').convert_alpha()
         self.floor_rect = self.floor_surf.get_rect(topleft=(0, 0))
 
     def custom_draw(self, player: Player):

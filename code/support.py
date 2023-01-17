@@ -1,9 +1,9 @@
 from csv import reader
-from os import walk, listdir
+from os import walk
 import pygame
 import base64
 import io
-import simplejson
+import json
 
 
 def import_csv_layout(path):
@@ -55,7 +55,7 @@ def import_folder_json():
         with open("../data/{}.json".format(name), 'r') as f1:
                 file = f1.read()
                 if not file: continue
-                data = simplejson.loads(file)
+                data = json.loads(file)
                 for i in data:
                     try:
                         keys = data[i].keys()
@@ -72,3 +72,14 @@ def import_folder_json():
                         print(e,i)
         files[name] = data
     return files
+
+
+def save_config(config:dict)->None:
+    with open('../data/config.json', encoding='utf-8', mode='w+') as file:
+        save_ = json.dumps(config)
+        file.write(save_)
+
+def load_config()->dict:
+    with open('../data/config.json', encoding='utf-8', mode='r') as file:
+        conf = json.loads(file.read())
+        return conf

@@ -1,7 +1,9 @@
 import pygame, sys
-from config import *
+import config
+from config import UPGRADE_BG_COLOR_SELECTED
 from save_game_system import check_saves
 from widget import button,ListButtons,_TextBox,Menu
+from sittings import SittingsMenu
 # Set up Pygame
 
 
@@ -10,20 +12,20 @@ from widget import button,ListButtons,_TextBox,Menu
 
 class MainMenu(Menu):
     def __init__(self, start_game):
-        super(MainMenu, self).__init__((340, 360),WIDTH // 12 * 10.2, HEIGTH // 2)
+        width,height = config.sittings["width"],config.sittings['height']
+        super(MainMenu, self).__init__((340, 360),width // 12 * 10.2, height // 2)
         self.background = pygame.image.load(
-            f'../graphics/main_menu/background_{WIDTH}x{HEIGTH}.png')
+            f'../graphics/main_menu/background_{width}x{height}.png')
         self.background_rect = self.background.get_rect()
-        self.music = pygame.mixer.Sound('../music/dima-koltsov-forest-queen-tale.mp3')
-        self.music.set_volume(VOLUME_MUSIC)
-        self.music.play()
+        self.sittings = SittingsMenu()
+        pygame.mixer.music.load('../music/dima-koltsov-forest-queen-tale.mp3')
+        pygame.mixer.music.set_volume(config.sittings["VOLUME_MUSIC"])
+        pygame.mixer.music.play()
         self.start_game = start_game
         pygame.mouse.set_visible(True)
-
         self.ColorTextShadow = 'grey'
         self.ColorText = 'black'
-
-        padding_top = 40
+        padding_top = 20
         self.buttons_main_menu = ListButtons()
         self.resume_button = self.create_button(20, 2 * 50 - padding_top, width=300,
                                                 height=40, text='Продолжить',
@@ -35,7 +37,7 @@ class MainMenu(Menu):
                                                   group=self.buttons_main_menu)
         self.sittings_button = self.create_button(20, 4 * 50 - padding_top, width=300,
                                                   height=40, text='Настройки',
-                                                  onClick=lambda: self.exit(),
+                                                  onClick=lambda: self._sittings_menu(),
                                                   group=self.buttons_main_menu)
         self.exit_button = self.create_button(20, 5 * 50 - padding_top, width=300,
                                               height=40, text='Выйти',
@@ -77,9 +79,14 @@ class MainMenu(Menu):
         self.player_data["name"] = self.textbox.getText()
 
     def resume(self):
-        self.music.fadeout(2000)
+        pygame.mixer.music.fadeout(2000)
         self.main_menu()
         self.start_game()
+
+    def _sittings_menu(self):
+        self.menu = self.sittings_menu
+        self.buttons_main_menu.hide()
+        self.buttons = None
 
     def choice_elf(self):
         self.player_data["species"] = "elf"
@@ -88,7 +95,7 @@ class MainMenu(Menu):
         self.player_data["species"] = "human"
 
     def start(self):
-        self.music.fadeout(2000)
+        pygame.mixer.music.fadeout(2000)
         self.start_game(self.player_data)
 
     def new_game(self):
@@ -98,6 +105,15 @@ class MainMenu(Menu):
         self.buttons_new_game_menu.show()
 
         self.player_data = {"name": "", "species": "human"}
+
+    def sittings_menu(self,events):
+        if not self.sittings.flag_exit:
+            self.sittings.update(events)
+        else:
+            self.sittings.flag_exit = not self.sittings.flag_exit
+            self.buttons = self.buttons_main_menu
+            self.menu = self.main_menu
+            self.buttons_main_menu.show()
 
     def back(self):
         self.buttons = self.buttons_main_menu
@@ -128,16 +144,19 @@ class MainMenu(Menu):
         else:
             self.resume_button.disable()
 
+        if not pygame.mixer.music.get_busy(): pygame.mixer.music.play()
+
     def new_game_menu(self):
         self.create_topleft_text(20, 20, 'Имя персонажа:')
         self.create_topleft_text(20, 120, 'Выбор расы:')
 
     def draw(self):
         self.surface_interface.fill('#f3f3f3')
-        self.frame()
+        self.frame(self.surface_interface)
 
     def update(self,events):
         self.display_surface.blit(self.background, self.background_rect)
+        if self.buttons is None: return self.menu(events)
         self.draw()
         self.menu()
         self.buttons.update(events)
@@ -146,7 +165,7 @@ class MainMenu(Menu):
 pygame.init()
 class Game:
     def __init__(self):
-        self.screen = pygame.display.set_mode((WIDTH, HEIGTH), pygame.DOUBLEBUF)
+        self.screen = pygame.display.set_mode((1280, 720), pygame.DOUBLEBUF)
         self.up = MainMenu(self.start_game)
         self.clock = pygame.time.Clock()
 

@@ -1,9 +1,12 @@
 import time
 import pygame
+import math
+import config
 from pygame_widgets.widget import WidgetBase
 from pygame_widgets.textbox import TextBox
 from pygame_widgets.button import Button
 from pygame_widgets.mouse import Mouse, MouseState
+from pygame_widgets.slider import Slider
 from config import *
 
 
@@ -225,6 +228,9 @@ class ListButtons(list):
     def addWidget(self, widget: WidgetBase) -> None:
         self.append(widget)
 
+    def addWidgets(self, widgets: [WidgetBase]) -> None:
+        [self.append(widget) for widget in widgets]
+
     def moveToTop(self, widget: WidgetBase):
         self.remove(widget)
         self.addWidget(widget)
@@ -240,7 +246,7 @@ class button(Button):
         self.left, self.top = rect.topleft
         self.sound_click_button = pygame.mixer.Sound(
             '../sounds/sound_click_button.mp3')
-        self.sound_click_button.set_volume(VOLUME_MENU_EFFECT)
+        self.sound_click_button.set_volume(config.sittings['VOLUME_MENU_EFFECT'])
 
     def contains(self, x, y):
         if not self._hidden and not self._disabled:
@@ -250,6 +256,9 @@ class button(Button):
                        self._y + self._height + self.top))
         else:
             return False
+
+    def setText(self, text):
+        self.text = self.font.render(text, True, self.textColour)
 
     def listen(self, events):
         if not self._hidden and not self._disabled:
@@ -290,25 +299,77 @@ class button(Button):
         self.borderColour = self.pressedBorderColour
 
 
+# class _Dropdown(Dropdown):
+#    def __init__(self, win,x, y, width, height, name, choices, isSubWidget=False,**kwargs):
+#
+#        super().__init__( win, x, y, width, height, name, choices, isSubWidget,**kwargs)
+#        kwargs.get('group', []).append(self)
+
+class _Slider(Slider):
+    def __init__(self, win, left, top, x, y, width, height, **kwargs):
+        super().__init__(win, x, y, width, height, **kwargs)
+        kwargs.get('group', []).append(self)
+        self.left, self.top = left, top
+
+    def listen(self, events):
+        if not self._hidden and not self._disabled:
+            mouseState = Mouse.getMouseState()
+            x, y = Mouse.getMousePos()
+
+            if self.contains(x, y):
+                if mouseState == MouseState.CLICK:
+                    self.selected = True
+
+            if mouseState == MouseState.RELEASE:
+                self.selected = False
+
+            if self.selected:
+                if self.vertical:
+                    self.value = self.max - self.round(
+                        (y - self._y - self.top) / self._height * self.max)
+                    self.value = max(min(self.value, self.max), self.min)
+                else:
+                    self.value = self.round(
+                        (x - self._x - self.left) / self._width * self.max + self.min)
+                    self.value = max(min(self.value, self.max), self.min)
+
+    def contains(self, x, y):
+        if self.vertical:
+            handleX = self._x + self.left + self._width // 2
+            handleY = int(
+                self._y + self.top + (self.max - self.value) / (
+                            self.max - self.min) * self._height)
+        else:
+            handleX = int(
+                self._x + self.left + (self.value - self.min) / (
+                            self.max - self.min) * self._width)
+            handleY = self._y + self.top + self._height // 2
+        if math.sqrt((handleX - x) ** 2 + (handleY - y) ** 2) <= self.handleRadius:
+            return True
+
+        return False
+
 
 pygame.font.init()
 
+
 class Menu:
-    def __init__(self,size,x,y):
+    def __init__(self, size, x, y):
         self.display_surface = pygame.display.get_surface()
         self.surface_interface = pygame.Surface(size)
         self.rect = self.surface_interface.get_rect(center=(x, y))
         self.font = pygame.font.SysFont('sans-serif', 30)
-        self.ColorTextShadow='black'
-        self.ColorText='white'
+        self.ColorTextShadow = 'black'
+        self.ColorText = 'white'
 
-    def frame(self):
-        pygame.draw.rect(self.surface_interface, '#c0c0c0', (0, 0, self.rect.w, self.rect.h),
+    def frame(self, screen):
+        rect = screen.get_rect()
+        pygame.draw.rect(screen, '#c0c0c0', (0, 0, rect.w, rect.h),
                          4)
-        pygame.draw.rect(self.surface_interface, '#8c8c8c',
-                         (2, 2, self.rect.w - 4, self.rect.h - 4), 2)
-        pygame.draw.rect(self.surface_interface, '#404040',
-                         (4, 4, self.rect.w - 8, self.rect.h - 8), 2)
+        pygame.draw.rect(screen, '#8c8c8c',
+                         (2, 2, rect.w - 4, rect.h - 4), 2)
+        pygame.draw.rect(screen, '#404040',
+                         (4, 4, rect.w - 8, rect.h - 8), 2)
 
     def create_topleft_text(self, x=0, y=0, text=''):
         Level_text_shadow = self.font.render(text, True, self.ColorTextShadow)
@@ -319,8 +380,8 @@ class Menu:
         self.surface_interface.blit(Level_text_shadow, Level_text_rect_shadow)
         self.surface_interface.blit(Level_text, Level_text_rect)
 
-
-    def create_center_text(self, x=0, y=0,font=pygame.font.Font(None,30), text='',ColorTextShadow='black',ColorText='white'):
+    def create_center_text(self, x=0, y=0, font=pygame.font.Font(None, 30), text='',
+                           ColorTextShadow='black', ColorText='white'):
         Level_text_shadow = self.font.render(text, True, self.ColorTextShadow)
         Level_text_rect_shadow = Level_text_shadow.get_rect(
             center=(x + 1, y + 1))

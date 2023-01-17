@@ -13,6 +13,7 @@ from screen_effect import Darking, Dark_screen, ScreenEffectList, Load_screen
 from Item import Weapon
 from upgrade import Upgrade
 from pause_menu import PauseMenu
+from game_over_menu import GameOverMenu
 from ui import UI
 
 
@@ -20,7 +21,6 @@ class Level:
     def __init__(self, data, PlyerData=None):
         # get the display surface
         self.display_surface = pygame.display.get_surface()
-        self.set_visible_mouse(False)
         # screen effect
         self.screen_effect = ScreenEffectList()
 
@@ -51,11 +51,15 @@ class Level:
         self.magic_player = Magic(self.animation)
 
         self.ui = UI()
+
         self.upgrade = Upgrade(self.player)
         self.flag_upgrade_menu = False
 
         self.pause = PauseMenu()
         self.flag_pause_menu = False
+
+        self.game_over_menu = GameOverMenu()
+        self.flag_game_over_menu = False
 
     def load_map(self):
 
@@ -111,7 +115,7 @@ class Level:
             self.destroy_attack, self.trigger_death_player, self.create_magic,
             self.import_magic, self.upgrade_menu, self.pause_menu)
         if player_info is not None:
-            self.location = ''
+            self.location = '1'
             self.player.player_name = player_info['name']
             self.player.load_data(data[player_info['species']], player_info['species'])
         else:
@@ -132,6 +136,11 @@ class Level:
         self.current_attack = None
         self.attack_sprites = pygame.sprite.Group()
         self.attackable_sprites = pygame.sprite.Group()
+        self.set_visible_mouse(False)
+        self.flag_upgrade_menu = False
+        self.flag_pause_menu = False
+        self.flag_game_over_menu = False
+
         self.create_player()
 
     def save(self):
@@ -184,8 +193,7 @@ class Level:
 
     def death_player(self):
         if not self.screen_effect and not self.player.living:
-            self.player.revival()
-            self.load()
+            self._game_over_menu()
 
     def trigger_death_player(self):
         self.screen_effect.add(Darking(reverse=True))
@@ -207,9 +215,12 @@ class Level:
         self.flag_pause_menu = not self.flag_pause_menu
         self.set_visible_mouse(self.flag_pause_menu)
 
+    def _game_over_menu(self):
+        self.flag_game_over_menu = not self.flag_game_over_menu
+        self.set_visible_mouse(self.flag_game_over_menu)
+
     def resume(self):
-        if self.flag_pause_menu: return self.pause_menu()
-        if self.flag_upgrade_menu: return self.upgrade_menu()
+         return self.pause_menu()
 
     def create_magic(self, id_magic, type, name, cost):
         magic = {"support": {
@@ -224,6 +235,7 @@ class Level:
                           [self.visible_sprites, self.attack_sprites])
 
     def run(self, events):
+        if self.flag_game_over_menu: return self.game_over_menu.update(events)
         self.visible_sprites.custom_draw(self.player)
         self.ui.display(self.player)
         if self.flag_pause_menu: return self.pause.update(events)

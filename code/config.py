@@ -1,3 +1,5 @@
+from importlib import __import__
+from support import load_config
 # game setup
 WIDTH    = 1280
 HEIGTH   = 720
@@ -36,11 +38,12 @@ BAR_COLOR_SELECTED = '#111111'
 UPGRADE_BG_COLOR_SELECTED = '#EEEEEE'
 
 #music
-VOLUME_MUSIC = 0.8
-VOLUME_MENU_EFFECT = 0.5
-
 translation = {'health': 'Здоровье', 'energy': 'Энергия',
                     'intelligence': 'Интеллект', 'body_type': 'Телосложение',
                     'power': 'Сила', 'dexterity': 'Ловкость'
     		, 'attack': 'Физический урон', 'magic': 'Магический урон', 'speed': 'Скорость'}
 
+
+sittings = load_config()
+
+__import__('config',globals=sittings)

@@ -24,3 +24,5 @@ def save(data:dict)->None:
     with open(f'saves/{file}', encoding='utf-8', mode='w+') as file:
         save_ = json.dumps(data)
         file.write(save_)
+
+

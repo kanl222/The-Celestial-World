@@ -64,7 +64,7 @@ class Upgrade(Menu):
             y = 360 + (i + 1) * 35 + 2
             self.create_topleft_text(60,y, text=f'{translation[self.stats_keys[i]]}:')
             self.create_topleft_text(300,y, text=f'{self.stats[self.stats_keys[i]]}')
-        self.frame()
+        self.frame(self.surface_interface)
 
 
     def update(self,events):

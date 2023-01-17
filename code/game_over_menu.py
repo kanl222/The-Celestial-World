@@ -1,41 +1,34 @@
 import pygame,sys
-from config import *
+import config
+from config import UPGRADE_BG_COLOR_SELECTED
 from events import *
 from widget import Menu,ListButtons,button
 from time import perf_counter
-Width,height= 1280,720
+
 # Set up Pygame
 pygame.init()
 win = pygame.display.set_mode((600, 600))
 # Creates an array of buttons
 
 
-class PauseMenu(Menu):
+class GameOverMenu(Menu):
     def __init__(self):
-        super(PauseMenu, self).__init__((300,300),WIDTH//2,HEIGTH//2)
+        width, height = config.sittings["width"], config.sittings['height']
+        super(GameOverMenu, self).__init__((300,200),width//2,height//2)
         self.buttons_main_menu = ListButtons()
-        self.background = pygame.Surface((WIDTH,HEIGTH),pygame.SRCALPHA)
+        self.background = pygame.Surface((width,height),pygame.SRCALPHA)
         self.background_rect = self.background.get_rect()
         self.background.fill('black')
-        self.background.set_alpha(180)
         self.resume_button = self.create_button(20, 1 * 50, width=260,
-                                                height=40, text='Продолжить',
-                                                onClick=lambda: self.resume(),
+                                                height=40, text='Загрузить сохранение',
+                                                onClick=lambda: self.load(),
                                                 group=self.buttons_main_menu)
-        self.sittings_button = self.create_button(20, 3 * 50 , width=260,
-                                                  height=40, text='Настройки',
-                                                  onClick=lambda: self.sittings(),
-                                                  group=self.buttons_main_menu)
-        self.saves_button = self.create_button(20, 2 * 50, width=260,
-                                                  height=40, text='Сохранить',
-                                                  onClick=lambda: self.save(),
-                                                  group=self.buttons_main_menu)
-        self.exit_button = self.create_button(20, 4 * 50 , width=260,
+        self.exit_button = self.create_button(20, 2 * 50 , width=260,
                                               height=40, text='Выйти',
                                               onClick=lambda: self.exit(),
                                               group=self.buttons_main_menu)
         self.font = pygame.font.SysFont('sans-serif', 80)
-        self.text_pause  = self.font.render('Пауза',True,'white')
+        self.text_pause  = self.font.render('Вы погибли',True,'red')
         x,y = self.rect.midtop
         self.text_pause_rect = self.text_pause.get_rect(midbottom=(x,y-40))
 
@@ -54,21 +47,15 @@ class PauseMenu(Menu):
             group.append(_button)
         return _button
 
-    def resume(self):
-        pygame.event.post(pygame.event.Event(RESUME))
-
-    def save(self):
-        pygame.event.post(pygame.event.Event(SAVEGAME))
-
-    def sittings(self):
-        pygame.event.post(pygame.event.Event(SETVISIBLEMOUSE))
+    def load(self):
+        pygame.event.post(pygame.event.Event(LOADLASTSAVE))
 
     def exit(self):
         pygame.event.post(pygame.event.Event(EXITINMENU))
 
     def draw(self):
         self.surface_interface.fill('white')
-        self.frame()
+        self.frame(self.surface_interface)
 
     def update(self,events):
         self.display_surface.blit(self.background,self.background_rect)
@@ -80,7 +67,7 @@ class PauseMenu(Menu):
 class Game:
     def __init__(self):
         self.screen = pygame.display.set_mode((1280, 720), pygame.DOUBLEBUF)
-        self.up = PauseMenu()
+        self.up = GameOverMenu()
         self.clock = pygame.time.Clock()
 
     def terminate(self):

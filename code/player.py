@@ -1,13 +1,13 @@
 import pygame
-from config import *
+import config
 from entity import Entity
 from support import import_folder
-from math import inf
+#from math import inf
 from effects import EffectsList
 
 
 class Player(Entity):
-    def __init__(self, pos, groups: list, obstacle_sprites, create_attack, destroy_attack,
+    def __init__(self, pos, groups, obstacle_sprites, create_attack, destroy_attack,
                  trigger_death,
                  create_magic, import_magic, upgrade_menu, pause_menu):
         super().__init__(groups)
@@ -114,44 +114,43 @@ class Player(Entity):
         if not self.flag_moving or not self.living:
             self.direction = pygame.math.Vector2()
             return
-
-        if keys[pygame.K_UP]:
+        if keys[config.sittings['button_move_up']]:
             self.direction.y = -1
             self.status = 'Up'
-        elif keys[pygame.K_DOWN]:
+        elif keys[config.sittings['button_move_down']]:
             self.direction.y = 1
             self.status = 'Down'
         else:
             self.direction.y = 0
 
-        if keys[pygame.K_RIGHT]:
+        if keys[config.sittings['button_move_right']]:
             self.direction.x = 1
             self.status = 'Right'
-        elif keys[pygame.K_LEFT]:
+        elif keys[config.sittings['button_move_left']]:
             self.direction.x = -1
             self.status = 'Left'
         else:
             self.direction.x = 0
 
-        if keys[pygame.K_LCTRL] and not self.attacking_magic:
+        if keys[config.sittings['button_using_magic']] and not self.attacking_magic:
             self.attacking_magic = True
-            self.attack_time = pygame.time.get_ticks()
+            self.attack_time_magic = pygame.time.get_ticks()
             type = self.magic["type"].split('_')
             cost = self.magic["cost"]
             self.create_magic(self.magic_list[self.magic_index], type[0], type[1],
                               cost)
-        if keys[pygame.K_f] and not self.attacking_weapon:
+        if keys[config.sittings['button_using_weapon']] and not self.attacking_weapon:
             self.attacking_weapon = True
             self.attack_time_weapon = pygame.time.get_ticks()
             self.create_attack()
 
-        if keys[pygame.K_q] and self.can_switch_magic:
+        if keys[config.sittings['button_change_magic']] and self.can_switch_magic:
             self.can_switch_magic = False
             self.magic_switch_time = pygame.time.get_ticks()
             self.magic_index = (self.magic_index + 1) % len(self.magic_list)
             self.magic = self.magic_data[self.magic_list[self.magic_index]]
 
-        if (keys[pygame.K_j] and self.can_upgrade_menu) or (
+        if (keys[config.sittings['button_open_menu_upgrade']] and self.can_upgrade_menu) or (
                 self.flag_upgrade_menu and keys[pygame.K_ESCAPE]):
             self.flag_upgrade_menu = not self.flag_upgrade_menu
             self.can_upgrade_menu = False

@@ -1,5 +1,4 @@
 import pygame
-import sys
 class ScreenEffectList(pygame.sprite.Group):
     def __init__(self):
         super(ScreenEffectList, self).__init__()

@@ -6,14 +6,6 @@ from widget import Menu, ListButtons, button
 from sittings import SittingsMenu
 from time import perf_counter
 
-Width, height = 1280, 720
-# Set up Pygame
-pygame.init()
-win = pygame.display.set_mode((600, 600))
-
-
-# Creates an array of buttons
-
 
 class PauseMenu(Menu):
     def __init__(self):
@@ -91,7 +83,7 @@ class PauseMenu(Menu):
         self.menu = self._sittings_menu
         self.buttons_main_menu.hide()
 
-    def pause_main_menu(self,events):
+    def pause_main_menu(self, events):
         self.draw()
         self.buttons_main_menu.update(events)
         self.display_surface.blit(self.surface_interface, self.rect)
@@ -132,6 +124,6 @@ class Game:
 
 
 if __name__ == '__main__':
-    print(pygame.USEREVENT)
+    pygame.init()
     game = Game()
     game.run()

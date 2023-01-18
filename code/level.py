@@ -1,4 +1,4 @@
-import pygame
+import pygame,config
 from support import import_csv_layout
 from config import *
 from player import Player
@@ -33,6 +33,13 @@ class Level:
         self.attack_sprites = pygame.sprite.Group()
         self.attackable_sprites = pygame.sprite.Group()
 
+        #music
+        self.music_channel = pygame.mixer.Channel(2)
+        self.music_channel.set_volume(config.sittings["volume_music"])
+        self.musics = [pygame.mixer.Sound('../music/es_castle-in-the-sky.mp3'),
+                       pygame.mixer.Sound('../music/Ambient 1.mp3'),
+                       pygame.mixer.Sound('../music/Ambient 2.mp3')]
+
         # sprite setup
         self.Object_sprites = Object_()
         self.data_object = data['Object']
@@ -60,6 +67,8 @@ class Level:
 
         self.game_over_menu = GameOverMenu()
         self.flag_game_over_menu = False
+
+
 
     def load_map(self):
 
@@ -123,6 +132,7 @@ class Level:
         self.visible_sprites.creating_floor(self.location)
         self.load_map()
         self.create_map()
+        self.music_channel.play(self.musics[2])
 
     def load_player(self):
         save_data = load_saves()
@@ -198,6 +208,7 @@ class Level:
             self._game_over_menu()
 
     def trigger_death_player(self):
+        self.music_channel.fadeout(2000)
         self.screen_effect.add(Darking(reverse=True))
 
     def trigger_death_particles(self, pos, particle_type):

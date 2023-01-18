@@ -2,15 +2,9 @@ import pygame, sys
 import config
 from config import UPGRADE_BG_COLOR_SELECTED
 from events import *
-from  support import save_config
+from support import save_config
 from widget import Menu, ListButtons, button, _Slider
 from time import perf_counter
-
-
-# Set up Pygame
-
-
-# Creates an array of buttons
 
 
 class SittingsMenu(Menu):
@@ -74,12 +68,12 @@ class SittingsMenu(Menu):
                                            min=0, max=99,
                                            step=1, group=self.audio_sittings_menu,
                                            initial=self.sitting_copy[
-                                                       'VOLUME_MUSIC'] * 100)
+                                                       'volume_music'] * 100)
         self.slider_VOLUME_MENU_EFFECT = _Slider(self.surface_frame, x, y, 20, 130, 530,
                                                  15, min=0, max=99,
                                                  step=1, group=self.audio_sittings_menu,
                                                  initial=self.sitting_copy[
-                                                             'VOLUME_MENU_EFFECT'] * 100)
+                                                             'volume_effects'] * 100)
         self.sittings_translation = {"Вправо": 'button_move_right',
                                      "Вниз": 'button_move_down',
                                      "Влево": 'button_move_left',
@@ -152,7 +146,13 @@ class SittingsMenu(Menu):
         self.menu = self.management_menu
 
     def accept(self):
-        config.sittings = self.sitting_copy
+        # if self.sitting_copy["width"] != config.sittings[ "width"] and  self.sitting_copy["height"] !=config.sittings["height"]:
+        #    pygame.event.post(pygame.event.Event(SETSIZESCREEN))
+        if self.sitting_copy["volume_music"] != config.sittings["volume_music"] or \
+                self.sitting_copy[
+                    "volume_effects"] != config.sittings["volume_effects"]:
+            pygame.event.post(pygame.event.Event(SETVOLUME, volume=self.sitting_copy["volume_music"]))
+        config.sittings = self.sitting_copy.copy()
         save_config(self.sitting_copy)
         self.flag_exit = True
 
@@ -179,9 +179,9 @@ class SittingsMenu(Menu):
         self.sitting_copy["height"] = heigth
 
     def audio_menu(self, events):
-        self.sitting_copy['VOLUME_MUSIC'] = self.slider_VOLUME_MUSIC.getValue() / 100
+        self.sitting_copy['volume_music'] = self.slider_VOLUME_MUSIC.getValue() / 100
         self.sitting_copy[
-            'VOLUME_MENU_EFFECT'] = self.slider_VOLUME_MENU_EFFECT.getValue() / 100
+            'volume_effects'] = self.slider_VOLUME_MENU_EFFECT.getValue() / 100
         self.create_topleft_text(self.surface_frame, 20, 20,
                                  text=f'Громкость музыки: {self.slider_VOLUME_MUSIC.getValue()}')
         self.create_topleft_text(self.surface_frame, 20, 100,
@@ -257,7 +257,5 @@ class Game:
 
 if __name__ == '__main__':
     pygame.init()
-    win = pygame.display.set_mode((600, 600))
-    print(pygame.USEREVENT)
     game = Game()
     game.run()

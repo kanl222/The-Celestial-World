@@ -246,7 +246,7 @@ class button(Button):
         self.left, self.top = rect.topleft
         self.sound_click_button = pygame.mixer.Sound(
             '../sounds/sound_click_button.mp3')
-        self.sound_click_button.set_volume(config.sittings['VOLUME_MENU_EFFECT'])
+        self.sound_click_button.set_volume(config.sittings['volume_effects'])
 
     def contains(self, x, y):
         if not self._hidden and not self._disabled:

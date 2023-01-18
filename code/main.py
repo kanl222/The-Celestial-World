@@ -18,6 +18,7 @@ class Game:
         self.menu = MainMenu(self.start_game)
         self.data = import_folder_json()
         self.frame = self.menu_
+        self.flag_game = False
 
     def terminate(self):
         pygame.quit()
@@ -30,6 +31,7 @@ class Game:
         pygame.mouse.set_visible(isVisible)
 
     def start_game(self, player_info = None):
+        self.flag_game = True
         self.level = Level(self.data,player_info)
         self.frame = self.game
 
@@ -50,6 +52,8 @@ class Game:
                     self.level.resume()
                 elif event.type == EXITINMENU:
                     self.set_visible_mouse(True)
+                    self.level.music_channel.stop()
+                    self.flag_game = False
                     self.frame = self.menu_
                 elif event.type == SAVEGAME:
                     self.level.save()
@@ -58,7 +62,12 @@ class Game:
                 elif event.type == SETVISIBLEMOUSE:
                     self.set_visible_mouse(event.__dict__['isVisible'])
                 elif event.type == SETSIZESCREEN:
-                    self.set_visible_mouse(event.__dict__['isVisible'])
+                    self.set_size_screen()
+                elif event.type == SETVOLUME:
+                    print(config.sittings)
+                    pygame.mixer.music.set_volume(event.__dict__['volume'])
+                    if self.flag_game:
+                        self.level.music_channel.set_volume(event.__dict__['volume'])
 
             self.frame(events)
             pygame.display.flip()

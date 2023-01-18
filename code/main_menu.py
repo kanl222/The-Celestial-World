@@ -2,27 +2,22 @@ import pygame, sys
 import config
 from config import UPGRADE_BG_COLOR_SELECTED
 from save_game_system import check_saves
-from widget import button,ListButtons,_TextBox,Menu
+from widget import button, ListButtons, _TextBox, Menu
 from sittings import SittingsMenu
-# Set up Pygame
-
-
-# Creates an array of buttons
 
 
 class MainMenu(Menu):
     def __init__(self, start_game):
-        width,height = config.sittings["width"],config.sittings['height']
-        super(MainMenu, self).__init__((340, 360),width // 12 * 10.2, height // 2)
+        width, height = config.sittings["width"], config.sittings['height']
+        super(MainMenu, self).__init__((340, 360), width // 12 * 10.2, height // 2)
         self.background = pygame.image.load(
             f'../graphics/main_menu/background_{width}x{height}.png')
         self.background_rect = self.background.get_rect()
         self.sittings = SittingsMenu()
-        pygame.mixer.music.load('../music/dima-koltsov-forest-queen-tale.mp3')
-        pygame.mixer.music.set_volume(config.sittings["VOLUME_MUSIC"])
+        pygame.mixer.music.load('../music/Ambient 1.mp3')
+        pygame.mixer.music.set_volume(config.sittings["volume_music"])
         pygame.mixer.music.play()
         self.start_game = start_game
-        pygame.mouse.set_visible(True)
         self.ColorTextShadow = 'grey'
         self.ColorText = 'black'
         padding_top = 20
@@ -63,7 +58,8 @@ class MainMenu(Menu):
                                              group=self.buttons_new_game_menu)
         self.textbox = _TextBox(self.surface_interface, self.rect, 20, 48, 300, 30,
                                 fontSize=30,
-                                borderColour='#c0c0c0', borderThickness=2,colour='#EEEEEE',
+                                borderColour='#c0c0c0', borderThickness=2,
+                                colour='#EEEEEE',
                                 textColour='black',
                                 onSubmit=self.submit)
         self.buttons_new_game_menu.append(self.textbox)
@@ -88,6 +84,9 @@ class MainMenu(Menu):
         self.buttons_main_menu.hide()
         self.buttons = None
 
+    def set_volume(self,volume):
+        pygame.mixer.music.set_volume(volume)
+
     def choice_elf(self):
         self.player_data["species"] = "elf"
 
@@ -106,7 +105,7 @@ class MainMenu(Menu):
 
         self.player_data = {"name": "", "species": "human"}
 
-    def sittings_menu(self,events):
+    def sittings_menu(self, events):
         if not self.sittings.flag_exit:
             self.sittings.update(events)
         else:
@@ -121,15 +120,12 @@ class MainMenu(Menu):
         self.buttons_new_game_menu.hide()
         self.buttons_main_menu.show()
 
-
-
-
     def create_button(self, x=0, y=0, width=25, height=25, text='',
                       onClick=lambda: print(1), group=None):
         _button = button(
             self.surface_interface, self.rect, x, y, width, height, text=text,
             fontSize=30, margin=10,
-            inactiveColour=UPGRADE_BG_COLOR_SELECTED,shadowColour='black',
+            inactiveColour=UPGRADE_BG_COLOR_SELECTED, shadowColour='black',
             pressedColour='grey', radius=1,
             borderThickness=2,
             borderColour='#c0c0c0',
@@ -154,7 +150,7 @@ class MainMenu(Menu):
         self.surface_interface.fill('#f3f3f3')
         self.frame(self.surface_interface)
 
-    def update(self,events):
+    def update(self, events):
         self.display_surface.blit(self.background, self.background_rect)
         if self.buttons is None: return self.menu(events)
         self.draw()
@@ -162,7 +158,7 @@ class MainMenu(Menu):
         self.buttons.update(events)
         self.display_surface.blit(self.surface_interface, self.rect)
 
-pygame.init()
+
 class Game:
     def __init__(self):
         self.screen = pygame.display.set_mode((1280, 720), pygame.DOUBLEBUF)
@@ -191,5 +187,6 @@ class Game:
 
 
 if __name__ == '__main__':
+    pygame.init()
     game = Game()
     game.run()

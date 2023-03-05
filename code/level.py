@@ -1,11 +1,12 @@
-import pygame,config
+import pygame, config
+import time
 from support import import_csv_layout
 from config import *
 from player import Player
 from magic import Magic
 from particles import Particle
 from enemy import Enemy
-from save_game_system import load_saves, save
+from save_game_system import load_saves, write_file
 from object_ import Object_
 from npc import NoPlayChatcter
 from events import SETVISIBLEMOUSE
@@ -18,12 +19,11 @@ from ui import UI
 
 
 class Level:
-    def __init__(self, data, PlyerData=None):
+    def __init__(self, data:dict):
         # get the display surface
         self.display_surface = pygame.display.get_surface()
         # screen effect
-        self.screen_effect = ScreenEffectList()
-
+        self.screen_effect = None
         # sprite group setup
         self.visible_sprites = YSortCameraGroup()
         self.obstacle_sprites = pygame.sprite.Group()
@@ -33,7 +33,7 @@ class Level:
         self.attack_sprites = pygame.sprite.Group()
         self.attackable_sprites = pygame.sprite.Group()
 
-        #music
+        # music
         self.music_channel = pygame.mixer.Channel(2)
         self.music_channel.set_volume(config.sittings["volume_music"])
         self.musics = [pygame.mixer.Sound('../music/es_castle-in-the-sky.mp3'),
@@ -46,12 +46,8 @@ class Level:
         self.data_magic = data['Magic']
         self.data_enemy = data['Enemy']
         self.data_npc = data['NPC']
+        self.data_players = data['Player']
 
-        self.flag_pos_player = False
-        if PlyerData is not None:
-            self.create_player(PlyerData, data['Player'])
-        else:
-            self.create_player()
 
         # particle
         self.animation = Particle(self.data_magic)
@@ -59,7 +55,7 @@ class Level:
 
         self.ui = UI()
 
-        self.upgrade = Upgrade(self.player)
+        self.upgrade = Upgrade()
         self.flag_upgrade_menu = False
 
         self.pause = PauseMenu()
@@ -68,9 +64,9 @@ class Level:
         self.game_over_menu = GameOverMenu()
         self.flag_game_over_menu = False
 
+        self.location = "1"
 
-
-    def load_map(self):
+    def load_tiles(self):
 
         self.layouts = {
             'boundary': import_csv_layout(f'../maps/{self.location}/_floor_blocks.csv'),
@@ -80,57 +76,63 @@ class Level:
         }
 
     def create_map(self):
-        self.screen_effect.add(Load_screen(2000), Darking())
-        for style, layout in self.layouts.items():
-            for row_index, row in enumerate(layout):
-                for col_index, col in enumerate(row):
-                    if col != '-1':
-                        x = col_index * TILESIZE
-                        y = row_index * TILESIZE
-                        if style == 'object':
-                            if col in self.data_object.keys():
-                                self.Object_sprites.AddStaticObject(self.data_object[col],
-                                                                    (x, y),
-                                                                    [self.visible_sprites,
-                                                                     self.obstacle_sprites])
-                        elif style == 'entity':
-                            if col == '0' and not self.flag_pos_player:
-                                self.player.change_pos((x, y))
-                            elif col in self.data_npc.keys():
-                                NoPlayChatcter((x, y), self.data_npc[col],
-                                               [self.visible_sprites])
-                        elif style == 'enemy':
-                            if col in self.data_enemy.keys():
-                                Enemy(
-                                    self.data_enemy[col],
-                                    (x, y),
-                                    [self.visible_sprites, self.attackable_sprites],
-                                    self.obstacle_sprites,
-                                    self.damage_player,
-                                    self.trigger_number,
-                                    self.trigger_death_particles,
-                                    self.add_exp)
-                        elif style == 'boundary':
-                            if col == '0':
-                                self.Object_sprites.AddStaticObject({}, (x, y), [
-                                    self.obstacle_sprites])
+        try:
+            for style, layout in self.layouts.items():
+                for row_index, row in enumerate(layout):
+                    for col_index, col in enumerate(row):
+                        if col != '-1':
+                            x = col_index * TILESIZE
+                            y = row_index * TILESIZE
+                            if style == 'object':
+                                if col in self.data_object.keys():
+                                    self.Object_sprites.AddStaticObject(self.data_object[col],
+                                                                        (x, y),
+                                                                        [self.visible_sprites,
+                                                                         self.obstacle_sprites])
+                            elif style == 'entity':
+                                print(self.player.pos())
+                                if self.player.pos() == (0, 0):
+                                    self.player.change_pos((x, y))
+                                elif col in self.data_npc.keys():
+                                    NoPlayChatcter((x, y), self.data_npc[col],
+                                                   [self.visible_sprites])
+                            elif style == 'enemy':
+                                if col in self.data_enemy.keys():
+                                    Enemy(
+                                        self.data_enemy[col],
+                                        (x, y),
+                                        [self.visible_sprites, self.attackable_sprites],
+                                        self.obstacle_sprites,
+                                        self.damage_player,
+                                        self.trigger_number,
+                                        self.trigger_death_particles,
+                                        self.add_exp)
+                            elif style == 'boundary':
+                                if col == '0':
+                                    self.Object_sprites.AddStaticObject({}, (x, y), [
+                                        self.obstacle_sprites])
+        except Exception:
+            return False
+        return True
 
-
-    def create_player(self, player_info=None, data=None):
+    def create_player(self, data: dict = None):
         self.player = Player(
             (0, 0),
             [self.visible_sprites],
             self.obstacle_sprites, self.create_attack,
             self.destroy_attack, self.trigger_death_player, self.create_magic,
             self.import_magic, self.upgrade_menu, self.pause_menu)
-        if player_info is not None:
-            self.location = "1"
-            self.player.player_name = player_info['name']
-            self.player.load_data(data[player_info['species']], player_info['species'])
+        if data is not None:
+            self.player.player_name = data['name']
+            self.player.load_data(self.data_players[data['species']], data['species'])
         else:
             self.load_player()
-        self.visible_sprites.creating_floor(self.location)
+        self.upgrade.set_player(self.player)
         self.load_map()
+
+    def load_map(self):
+        self.visible_sprites.creating_floor(self.location)
+        self.load_tiles()
         self.create_map()
         self.music_channel.play(self.musics[2])
 
@@ -152,7 +154,6 @@ class Level:
         self.flag_upgrade_menu = False
         self.flag_pause_menu = False
         self.flag_game_over_menu = False
-
         self.create_player()
 
     def save(self):
@@ -172,7 +173,7 @@ class Level:
             }
         }
         }
-        save(data)
+        write_file(data)
 
     def set_visible_mouse(self, isVisible):
         pygame.event.post(pygame.event.Event(SETVISIBLEMOUSE, isVisible=isVisible))
@@ -183,7 +184,7 @@ class Level:
         self.current_attack = None
 
     def create_attack(self):
-        self.current_attack = Weapon(self.player,[self.attack_sprites])
+        self.current_attack = Weapon(self.player, [self.attack_sprites])
 
     def player_attack_logic(self):
         if self.attack_sprites:
@@ -233,7 +234,7 @@ class Level:
         self.set_visible_mouse(self.flag_game_over_menu)
 
     def resume(self):
-         return self.pause_menu()
+        return self.pause_menu()
 
     def create_magic(self, id_magic, type, name, cost):
         magic = {"support": {
@@ -248,6 +249,7 @@ class Level:
                           [self.visible_sprites, self.attack_sprites])
 
     def run(self, events):
+        start_time = time.time()
         if self.flag_game_over_menu: return self.game_over_menu.update(events)
         self.visible_sprites.custom_draw(self.player)
         self.ui.display(self.player)
@@ -257,8 +259,8 @@ class Level:
         self.visible_sprites.npc_update(self.player)
         self.player_attack_logic()
         self.death_player()
-        if self.flag_upgrade_menu:  self.upgrade.update(events)
-        self.screen_effect.update()
+        print("--- %s seconds ---" % (time.time() - start_time))
+        if self.flag_upgrade_menu: return self.upgrade.update(events)
 
 
 class YSortCameraGroup(pygame.sprite.Group):
@@ -274,7 +276,7 @@ class YSortCameraGroup(pygame.sprite.Group):
 
         # creating the floor
 
-    def creating_floor(self,location):
+    def creating_floor(self, location):
         self.floor_surf = pygame.image.load(
             f'../maps/{location}/map.png').convert_alpha()
         self.floor_rect = self.floor_surf.get_rect(topleft=(0, 0))

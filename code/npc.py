@@ -4,8 +4,9 @@ from entity import Entity
 from dialog import DialogSystem
 from support import import_image
 
-class NoPlayChatcter(Entity):
-    def __init__(self,pos,data_npc=None,groups=None):
+
+class Npc(Entity):
+    def __init__(self, pos: tuple, data_npc: dict, groups: list):
         super().__init__(groups)
         self.sprite_type = 'npc'
         self.data_npc = data_npc
@@ -14,20 +15,29 @@ class NoPlayChatcter(Entity):
         self.rect = self.image.get_rect(bottomleft=pos)
         self.hitbox = self.rect.inflate(0, -10)
         self.dialog = DialogSystem(self.name)
+        self.is_talking = False
 
 
+    def start_dialog(self, player: 'Player') -> None:
+        player.flag_moving = False
+        self.dialog.flag = True
+        self.is_talking = True
 
-    def npc_update(self,player):
-        keys = pg.key.get_pressed()
-        if player.EntityVector2().distance_to(self.EntityVector2()) <= 100:
-            if keys[pg.K_e] and not self.dialog.flag:
-                player.flag_moving = False
-                self.dialog.flag = True
-            if keys[pygame.K_ESCAPE] or not self.dialog.flag:
-                self.dialog.flag = False
-                player.flag_moving = True
+    def end_dialog(self, player: 'Player') -> None:
+        player.flag_moving = True
+        self.dialog.flag = False
+        self.is_talking = False
 
-            if self.dialog.flag:
-                self.dialog.update()
+    def npc_update(self, player: 'Player',events) -> None:
+        for event in events:
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_e and not self.dialog.flag and player.EntityVector2().distance_to(self.EntityVector2()) <= 100:
+                    self.start_dialog(player)
+                elif event.key == pg.K_ESCAPE or not self.dialog.flag:
+                    self.end_dialog(player)
+
+        if self.dialog.flag:
+            self.dialog.update()
+
 
 

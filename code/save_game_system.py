@@ -1,32 +1,47 @@
-import os, json
+import os
+import json
+from typing import Dict, List
 
+SAVES_PATH = 'saves'
 
 def check_saves() -> bool:
-    if os.path.exists('saves'):
-        return any(filter(lambda x: '.json' in x, os.listdir('saves/')))
+    """
+    Check if any saves exist.
+
+    Returns:
+        bool: True if there are save files, False otherwise.
+    """
+    if os.path.exists(SAVES_PATH):
+        return any(filter(lambda x: '.json' in x, os.listdir(f'{SAVES_PATH}/')))
     return False
 
+def load_saves() -> Dict:
+    """
+    Load the latest save file.
 
-def load_saves() -> dict:
-    try:
-        saves = os.listdir('saves/')
-    except FileNotFoundError:
-        return {}
-    saves.sort(key=lambda x: int(x.split('.')[0]), reverse=True)
-    with open(f'saves/{saves[0]}', encoding='utf-8', mode='r') as save:
-        save_ = json.loads(save.read())
-        return save_
+    Returns:
+        dict: The data from the latest save file.
+    """
+    files = [f for f in os.listdir(SAVES_PATH) if f.endswith('.json')]
+    files.sort(reverse=True)
+    with open(os.path.join(SAVES_PATH, files[0]), encoding='utf-8', mode='r') as save:
+        return json.load(save)
 
+def save(data: Dict) -> None:
+    """
+    Save the data to a file.
 
-def write_file(data: dict) -> None:
-    savespath = 'saves'
-    file = '1.json'
-    if not os.path.exists(savespath):
-        os.makedirs(savespath)
-    if os.path.exists(savespath):
-        saves = os.listdir(f'{savespath}/')
-        saves.sort(key=lambda x: int(x.split('.')[0]), reverse=True)
-        file = f'{int(saves[0].split(".")[0]) if saves else 1 + 1}.json'
-
-    with open(f'{savespath}/{file}', encoding='utf-8', mode='w+') as file:
-        file.write(json.dumps(data))
+    Args:
+        data (dict): The data to save.
+    """
+    if not os.path.exists(SAVES_PATH):
+        os.makedirs(SAVES_PATH)
+    files = [f for f in os.listdir(SAVES_PATH) if f.endswith('.json')]
+    if files:
+        files.sort(reverse=True)
+        file_num = int(files[0].split('.')[0]) + 1
+    else:
+        file_num = 1
+    file_name = f'{file_num}.json'
+    with open(os.path.join(SAVES_PATH, file_name), encoding='utf-8', mode='w+') as file:
+        json.dump(data, file)

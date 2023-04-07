@@ -18,6 +18,7 @@ from game_over_menu import GameOverMenu
 from ui import UI
 
 
+
 class Level:
     def __init__(self, data, PlyerData=None):
         # get the display surface
@@ -235,7 +236,6 @@ class Level:
          return self.pause_menu()
 
     def create_magic(self, id_magic, type, name, cost):
-        print(12)
         magic = {"support": {
             'heal': self.magic_player.heal},
             "attack": {
@@ -291,9 +291,9 @@ class YSortCameraGroup(pygame.sprite.Group):
         floor_offset_position = self.floor_rect.topleft - self.offset
         self.display_surface.blit(self.floor_surf, floor_offset_position)
         sprites = [sprite for sprite in self.sprites()
-                   if player.EntityVector2().distance_to(
+                   if player.get_entity_vector().distance_to(
             pygame.math.Vector2(sprite.rect.center)) <= self.distance_w
-                   if abs(player.EntityVector2().y - pygame.math.Vector2(sprite.rect.center).y) <= self.distance_h]
+                   if abs(player.get_entity_vector().y - pygame.math.Vector2(sprite.rect.center).y) <= self.distance_h]
 
         self.count_sprite_updates = len(sprites)
 

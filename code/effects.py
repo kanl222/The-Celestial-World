@@ -37,47 +37,33 @@ class Effect(pg.sprite.Sprite):
         current_time = pg.time.get_ticks()
         if current_time - self.start_time >= self.duration: self.kill()
 
+    def update(self, entity):
+        self.update_duration()
+
 class Strength(Effect):
     def __init__(self, data:dict):
         super(Strength, self).__init__(data)
-
-    def update(self,entity):
-        self.duration()
 
 class Poison(Effect):
     def __init__(self, data:dict):
         super(Poison, self).__init__(data)
 
-    def update(self,entity):
-        self.duration()
-
 class HealthBoost(Effect):
     def __init__(self, data:dict):
         super(HealthBoost, self).__init__(data)
-
-    def update(self,entity):
-        self.duration()
 
 class Weakness(Effect):
     def __init__(self, data:dict):
         super(Weakness, self).__init__(data)
 
-    def update(self,entity):
-        self.duration()
-
 class Blind(Effect):
     def __init__(self,data:dict):
         super(Blind, self).__init__(data)
-
-    def update(self,entity):
-        self.duration()
 
 class Regeneration(Effect):
     def __init__(self, data:dict):
         super(Regeneration, self).__init__(data)
 
-    def update(self,entity):
-        self.duration()
 
 
 if __name__ == '__main__':

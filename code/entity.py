@@ -37,5 +37,5 @@ class Entity(sprite.Sprite):
                         self.hitbox.left = sprite.hitbox.right
 
 
-    def EntityVector2(self) -> math.Vector2:
+    def get_entity_vector(self) -> math.Vector2:
         return math.Vector2(self.rect.center)

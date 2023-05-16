@@ -1,0 +1,174 @@
+import pygame as pg
+from random import choice
+
+pg.font.init()
+
+class Particle:
+
+
+
+    def reflect_images(self, frames):
+        return [pg.transform.flip(x, True, False) for x in frames]
+
+    def create_grass_particles(self, pos, groups):
+        ParticleEffect(pos, choice(self.frames['leaf']), groups)
+
+    def create_particles(self, frames, pos, groups):
+        ParticleEffect(pos, frames, groups)
+
+    def creat_bullet_magic(self,direction, pos, frames, groups):
+        Bullet(direction, pos, frames, groups)
+
+    def create_number(self, pos, number, groups, color=None):
+        MoveNumberRender(pos, number, groups, color)
+
+
+class ParticleEffect(pg.sprite.Sprite):
+    def __init__(self, pos, animation_frames, groups):
+        super().__init__(groups)
+        self.sprite_type = 'particle'
+        self.queue = 2
+        self.frame_index = 0
+        self.animation_speed = 0.15
+        self.stage_index = 0
+        self.stages_frame = ['start','loops','end']
+        self.frames = animation_frames
+        if isinstance(self.frames, list):
+            self.image = self.frames[int(self.frame_index)]
+            self.rect = self.image.get_rect(center=pos)
+            self.render = self.animate_list
+        elif isinstance(self.frames, dict):
+            if not self.frames[self.stages_frame[self.stage_index]]:
+                self.stage_index += 1
+                if  not self.frames[self.stages_frame[self.stage_index]]: 
+                    self.stage_index += 1
+                    if  not self.frames[self.stages_frame[self.stage_index]]: 
+                        self.kill()   
+            self.image = self.frames[self.stages_frame[self.stage_index]][self.frame_index]
+            self.rect = self.image.get_rect(center=pos)
+            self.render = self.animate_dict
+
+    def animate_list(self):
+        self.frame_index += self.animation_speed
+        if self.frame_index >= len(self.frames):
+            self.kill()
+        else:
+            self.image = self.frames[int(self.frame_index)]
+
+    def animate_dict(self):
+        self.frame_index += self.animation_speed
+        if self.frame_index >= len(self.frames[self.stages_frame[self.stage_index]]):
+            self.stage_index+=1
+            if self.stage_index == 2 or not self.frames[self.stages_frame[self.stage_index]]:
+                self.kill()
+            else:
+                    self.stage_index += 1
+                    self.frame_index = 0
+        else:
+            self.image = self.frames[self.stages_frame[self.stage_index]][int(self.frame_index)]
+
+    def update(self):
+        self.render()
+
+
+class MoveNumberRender(pg.sprite.Sprite):
+    FONT_OBJECT = pg.font.SysFont(None, 30)
+    SHADOW_OFFSET = (1, 1)
+
+    def __init__(self, pos: tuple, number: str, groups: list, color=(255, 255, 255)):
+        super().__init__(groups)
+        self.queue = 4
+        self.moving_y = 0
+        self.animation_speed = 1.2
+        self.image = pg.Surface((30*len(number), 30*len(number)), pg.SRCALPHA)
+        text = self.FONT_OBJECT.render(number, True, color)
+        shadow_text = self.FONT_OBJECT.render(number, True, (0, 0, 0))
+        self.image.blit(shadow_text, self.SHADOW_OFFSET)
+        self.image.blit(text, (0,0))
+        self.rect = self.image.get_rect(midtop=(pos[0], pos[1] - 10))
+
+    def animate(self):
+        if self.moving_y < 16:
+            self.rect.y -= self.animation_speed
+            self.moving_y += self.animation_speed
+        else:
+            self.kill()
+
+    def update(self):
+        self.animate()
+
+
+
+
+class Bullet(pg.sprite.Sprite):
+    def __init__(self, direction, pos, animation_frames, groups):
+        super().__init__(groups)
+        self.sprite_type = 'particle'
+        self.speed = 10
+        self.frame_index = 0
+        self.animation_speed = 0.15
+        self.stage_index = 0
+        self.stages_frame = ['start','loops','end']
+        self.direction = direction
+        print(animation_frames)
+        if isinstance(animation_frames, list):
+                self.frames = [self.direction_image(img) for img in animation_frames]
+                self.image = self.frames[int(self.frame_index)]
+                self.rect = self.image.get_rect(center=pos)
+                self.render = self.animate_list
+        elif isinstance(animation_frames, dict):
+            self.frames = {key:[self.direction_image(img) for img in animation_frames[key]] for key in self.stages_frame if animation_frames[key] }
+            print(self.frames)
+            try:
+                if self.stages_frame[self.stage_index] in self.frames.keys():
+                    self.stage_index = 1
+                    if self.stages_frame[self.stage_index] in self.frames.keys():
+                        self.stage_index = 2
+                print(self.stages_frame[self.stage_index],self.frame_index,self.frames[self.stages_frame[self.stage_index]][self.frame_index])
+                self.image = self.frames[self.stages_frame[self.stage_index]][self.frame_index]
+                self.rect = self.image.get_rect(center=pos)
+            except Exception as e:
+                print(e)
+            self.render = self.animate_dict
+    def animate_list(self):
+        self.frame_index += self.animation_speed
+        self.image = self.frames[int(self.frame_index) % len(self.frames)]
+
+    def animate_dict(self):
+        self.frame_index += self.animation_speed
+        if self.frame_index >= len(self.frames[self.stages_frame[self.stage_index]]):
+            self.stage_index+=1
+            if self.stage_index == 0:
+                self.stage_index += 1
+                self.frame_index = 0
+            else:
+                self.frame_index = 0
+        else:
+            self.image = self.frames[self.stages_frame[self.stage_index]][int(self.frame_index)]
+
+    def collision(self):
+        self.kill()
+
+    def rot_center(self,image, angle):
+        loc = image.get_rect().center  # rot_image is not defined
+        rot_sprite = pg.transform.rotate(image, angle).convert_alpha()
+        rot_sprite.get_rect().center = loc
+        return rot_sprite
+
+    def direction_image(self,img):
+        if self.direction == (1, 0):
+            return self.rot_center(img,180)
+        elif self.direction == (-1, 0):
+            return img
+        elif self.direction == (0, -1):
+            return self.rot_center(img,-90)
+        else:
+            return self.rot_center(img,90)
+
+    def update(self) -> None:
+        current_time = pg.time.get_ticks()
+        if current_time - self.hit_time >= 2000:
+            self.collision()
+        self.rect.x += self.direction.x * self.speed
+        self.rect.y += self.direction.y * self.speed
+        self.render()

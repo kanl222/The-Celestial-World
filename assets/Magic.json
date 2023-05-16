@@ -1,0 +1,35 @@
+{
+  "1": {
+    "name": "flame",
+    "type": "on_enemy_magic",
+    "cost": 20,
+    "damage": 20,
+    "cooldown": 0.1,
+    "range": 0,
+    "upgrade_level": 5,
+    "element": "fire",
+    "explosion_range": 4,
+    "radius":  5,
+    "effect": {
+      "name": "burning",
+      "duration": 5,
+      "power": 2
+    }
+  },
+  "2": {
+    "name": "fireball",
+    "type": "bullet_magic",
+    "cost": 20,
+    "damage": 20,
+    "cooldown": 1,
+    "range": 0,
+    "upgrade_level": 5,
+    "element": "fire",
+    "flight_range":5,
+    "effect": {
+      "name": "burning",
+      "duration": 5,
+      "power": 5
+    }
+  }
+}

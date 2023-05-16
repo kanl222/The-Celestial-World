@@ -1,0 +1,19 @@
+{
+  "645": {
+    "type_Object": "static_object",
+    "name": "tree",
+    "hitbox_offset": [
+      -10,
+      -40
+    ]
+  
+  },
+  "562": {
+    "type_Object": "static_object",
+    "name": "bush",
+    "hitbox_offset": [
+      -10,
+      -20
+    ]
+  }
+}

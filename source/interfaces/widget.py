@@ -24,168 +24,23 @@ class _TextBox(TextBox):
         else:
             return False
 
-    def listen(self, events):
-        """ Wait for inputs
+    def listen(self, events) -> None:
+        """Делегируем обработку ввода родительскому классу TextBox.
 
-        :param events: Use pygame.event.get()
-        :type events: list of pygame.event.Event
+        Это позволяет использовать актуальную логику ввода новой библиотеки
+        (включая поддержку многострочности, выделения, буфера обмена и т.д.),
+        но с использованием нашей переопределенной функции contains() для учета смещений.
         """
-        if not self._hidden and not self._disabled:
-            if self.keyDown:
-                self.updateRepeatKey()
+        super().listen(events)
 
-            # Selection
-            mouseState = Mouse.getMouseState()
-            x, y = Mouse.getMousePos()
+    def draw(self) -> None:
+        """Делегируем отрисовку родительскому классу TextBox.
 
-            if mouseState == MouseState.CLICK:
-                if self.contains(x, y):
-                    self.selected = True
-                    self.showCursor = True
-                    self.cursorTime = time.time()
-
-                else:
-                    self.selected = False
-                    self.showCursor = False
-                    self.cursorTime = time.time()
-
-            # Keyboard Input
-            if self.selected:
-                for event in events:
-                    if event.type == pygame.KEYDOWN:
-                        self.showCursor = True
-                        self.keyDown = True
-                        self.repeatKey = event
-                        self.repeatTime = time.time()
-
-                        if event.key == pygame.K_BACKSPACE:
-                            if self.cursorPosition != 0:
-                                self.maxLengthReached = False
-                                self.text.pop(self.cursorPosition - 1)
-                                self.onTextChanged(*self.onTextChangedParams)
-
-                            self.cursorPosition = max(self.cursorPosition - 1, 0)
-
-                        elif event.key == pygame.K_DELETE:
-                            if not self.cursorPosition >= len(self.text):
-                                self.maxLengthReached = False
-                                self.text.pop(self.cursorPosition)
-                                self.onTextChanged(*self.onTextChangedParams)
-
-                        elif event.key == pygame.K_RETURN:
-                            self.onSubmit(*self.onSubmitParams)
-
-                        elif event.key == pygame.K_RIGHT:
-                            self.cursorPosition = min(self.cursorPosition + 1,
-                                                      len(self.text))
-
-                        elif event.key == pygame.K_LEFT:
-                            self.cursorPosition = max(self.cursorPosition - 1, 0)
-
-                        elif event.key == pygame.K_END:
-                            self.cursorPosition = len(self.text)
-
-                        elif event.key == pygame.K_ESCAPE:
-                            if not self.escape:
-                                self.selected = False
-                                self.showCursor = False
-                                self.escape = True
-                                self.repeatKey = None
-                                self.keyDown = None
-                                self.firstRepeat = True
-
-                        elif not self.maxLengthReached:
-                            if len(event.unicode) > 0:
-                                self.text.insert(self.cursorPosition, event.unicode)
-                                self.cursorPosition += 1
-                                self.onTextChanged(*self.onTextChangedParams)
-
-                    elif event.type == pygame.KEYUP:
-                        self.repeatKey = None
-                        self.keyDown = None
-                        self.firstRepeat = True
-                        self.escape = False
-
-    def draw(self):
-        """ Display to surface """
-        if not self._hidden:
-            if self.selected:
-                self.updateCursor()
-
-            borderRects = [
-                (self._x + self.radius, self._y, self._width - self.radius * 2,
-                 self._height),
-                (self._x, self._y + self.radius, self._width,
-                 self._height - self.radius * 2),
-            ]
-
-            borderCircles = [
-                (self._x + self.radius, self._y + self.radius),
-                (self._x + self.radius, self._y + self._height - self.radius),
-                (self._x + self._width - self.radius, self._y + self.radius),
-                (self._x + self._width - self.radius,
-                 self._y + self._height - self.radius)
-            ]
-
-            backgroundRects = [
-                (
-                    self._x + self.borderThickness + self.radius,
-                    self._y + self.borderThickness,
-                    self._width - 2 * (self.borderThickness + self.radius),
-                    self._height - 2 * self.borderThickness
-                ),
-                (
-                    self._x + self.borderThickness,
-                    self._y + self.borderThickness + self.radius,
-                    self._width - 2 * self.borderThickness,
-                    self._height - 2 * (self.borderThickness + self.radius)
-                )
-            ]
-
-            backgroundCircles = [
-                (self._x + self.radius + self.borderThickness,
-                 self._y + self.radius + self.borderThickness),
-                (self._x + self.radius + self.borderThickness,
-                 self._y + self._height - self.radius - self.borderThickness),
-                (self._x + self._width - self.radius - self.borderThickness,
-                 self._y + self.radius + self.borderThickness),
-                (self._x + self._width - self.radius - self.borderThickness,
-                 self._y + self._height - self.radius - self.borderThickness)
-            ]
-
-            for rect in borderRects:
-                pygame.draw.rect(self.win, self.borderColour, rect)
-
-            for circle in borderCircles:
-                pygame.draw.circle(self.win, self.borderColour, circle, self.radius)
-
-            for rect in backgroundRects:
-                pygame.draw.rect(self.win, self.colour, rect)
-
-            for circle in backgroundCircles:
-                pygame.draw.circle(self.win, self.colour, circle, self.radius)
-
-            x = [self._x + self.textOffsetLeft]
-            for c in self.text:
-                text = self.font.render(c, True, self.textColour)
-                textRect = text.get_rect(midleft=(
-                    x[-1], self._y + self._height - self.textOffsetBottom))
-                self.win.blit(text, textRect)
-                x.append(x[-1] + text.get_width())
-
-            if self.showCursor:
-                try:
-                    pygame.draw.line(
-                        self.win, (0, 0, 0),
-                        (x[self.cursorPosition], self._y + self.cursorOffsetTop),
-                        (x[self.cursorPosition],
-                         self._y + self._height - self.cursorOffsetTop)
-                    )
-                except IndexError:
-                    self.cursorPosition -= 1
-
-            if x[-1] > self._x + self._width - self.textOffsetRight:
-                self.maxLengthReached = True
+        Старая реализация была несовместима с pygame-widgets >= 1.3:
+        в новой версии self.text = [[]] (список строк-списков), а не плоский список символов,
+        поэтому font.render(c) падал с TypeError когда c был списком вместо строки.
+        """
+        super().draw()
 
 
 class ListButtons(list):
@@ -244,9 +99,14 @@ class button(Button):
                  **kwargs):
         super(button, self).__init__(win, x, y, width, height, isSubWidget, **kwargs)
         self.left, self.top = rect.topleft
-        self.sound_click_button = pygame.mixer.Sound(
-            '../sounds/sound_click_button.mp3')
-        self.sound_click_button.set_volume(config.sittings['volume_effects'])
+        from support import resolve_path
+        sound_path = resolve_path('sounds/sound_click_button.mp3')
+        try:
+            self.sound_click_button = pygame.mixer.Sound(str(sound_path))
+            self.sound_click_button.set_volume(config.sittings['volume_effects'])
+        except (FileNotFoundError, pygame.error):
+            self.sound_click_button = None
+
 
     def contains(self, x, y):
         if not self._hidden and not self._disabled:
@@ -271,10 +131,12 @@ class button(Button):
 
                 elif mouseState == MouseState.CLICK:
                     self.clicked = True
-                    self.sound_click_button.play()
+                    if self.sound_click_button:
+                        self.sound_click_button.play()
                     self.onClick(*self.onClickParams)
                     self.colour = self.pressedColour
                     self.borderColour = self.pressedBorderColour
+
 
                 elif mouseState == MouseState.DRAG and self.clicked:
                     self.colour = self.pressedColour

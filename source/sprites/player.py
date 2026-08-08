@@ -2,7 +2,7 @@ import pygame
 import config
 from .entity import Entity
 from item.weapon import Weapon
-from support import import_folder
+from support import import_folder, import_image
 #from math import inf
 from effects import EffectsList
 from elemets import Damage
@@ -14,11 +14,11 @@ class Player(Entity):
                  create_magic, import_magic,import_weapon, upgrade_menu, pause_menu):
         super().__init__(groups) 
 
-        self.image = pygame.image.load(
-            '../graphics/player/elf/Down_idle/Down.png').convert_alpha()
+        self.image = import_image('graphics/player/elf/Down_idle/Down.png')
         self.rect = self.image.get_rect(topleft=pos)
         self.hitbox = self.rect.inflate(0, -40)
         self.hitbox.midbottom = self.rect.midbottom
+
         self.direction = pygame.math.Vector2()
         self.flag_pos_player = False
         self.player_name = ''
@@ -62,7 +62,8 @@ class Player(Entity):
 
         self.switch_duration_cooldown = 250
 
-    def change_pos(self, pos):
+    def change_pos(self, pos: tuple) -> None:
+        """Pеустанавливает позицию игрока (например, после загрузки сохранения)."""
         self.rect = self.image.get_rect(topleft=pos)
         self.hitbox = self.rect.inflate(0, -30)
 
@@ -82,7 +83,8 @@ class Player(Entity):
         for animation in self.animations.keys():
             self.animations[animation] = import_folder(character_path + animation)
 
-    def load_data(self, PlayerData, species=None):
+    def load_data(self, PlayerData: dict, species: str | None = None) -> None:
+        """Zагружает данные игрока из словаря. При новой игре species передаётся явно."""
         self.species = PlayerData['species'] if species is None else species
         self.character = PlayerData['character']
         self.point_character = PlayerData['point_character']
@@ -102,7 +104,8 @@ class Player(Entity):
         self.load_magic()
         self.import_player_assets()
 
-    def update_stats(self):
+    def update_stats(self) -> None:
+        """Pесчитывает stats игрока на основе текущих характеристик."""
         health = self.character['health'] * 10 + self.character['energy'] * 2 + \
                 self.character['body_type'] * 3
         energy = self.character['energy'] * 10 + self.character['body_type'] * 0.05 + \
@@ -209,10 +212,11 @@ class Player(Entity):
             if 'attack' in self.status and int(self.frame_index + self.animation_speed) % len(self.animations[self.status]) == 0:
                 self.status = self.status.replace('_attack', '')
 
-    def animate(self):
+    def animate(self) -> None:
+        """Cменяет фрейм анимации. convert_alpha() не вызывается — уже выполнено при загрузке."""
         animation = self.animations[self.status]
         self.frame_index = (self.frame_index + self.animation_speed) % len(animation)
-        self.image = animation[int(self.frame_index)].convert_alpha()
+        self.image = animation[int(self.frame_index)]
         self.rect = self.image.get_rect(center=self.hitbox.center)
 
     def add_energy(self, strength):
@@ -279,7 +283,8 @@ class Player(Entity):
         else:
             self.energy = self.stats['energy']
 
-    def update(self):
+    def update(self) -> None:
+        """Eжекадровое обновление состояния игрока."""
         self.input()
         self.cooldowns()
         self.effects.update_effects()

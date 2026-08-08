@@ -1,11 +1,13 @@
 import pygame
 from config import *
+from support import import_image
 
 class UI:
     def __init__(self):
         self.display_surface = pygame.display.get_surface()
-        self.image = pygame.image.load('../graphics/ui/interface.png').convert_alpha()
+        self.image = import_image('graphics/ui/interface.png')
         self.rect = self.image.get_rect(topleft=(10, 10))
+
         
         self.health_bar_rect = pygame.Rect(150, 44, 430, 28)
         self.energy_bar_rect = pygame.Rect(150, 94, 360, 28)

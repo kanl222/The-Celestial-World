@@ -4,23 +4,28 @@ from random import choice
 pg.font.init()
 
 class Particle:
-
-
+    def __init__(self):
+        # frames \u2014 \u0441\u043b\u043e\u0432\u0430\u0440\u044c \u0430\u043d\u0438\u043c\u0430\u0446\u0438\u0439 (\u043d\u0430\u043f\u0440., 'leaf'). \u041f\u043e\u0434\u043a\u043b\u0430\u0441\u0441\u044b \u0434\u043e\u043b\u0436\u043d\u044b \u0437\u0430\u043f\u043e\u043b\u043d\u044f\u0442\u044c \u0435\u0433\u043e \u043f\u0440\u0438 \u043d\u0435\u043e\u0431\u0445\u043e\u0434\u0438\u043c\u043e\u0441\u0442\u0438.
+        self.frames: dict = {}
 
     def reflect_images(self, frames):
         return [pg.transform.flip(x, True, False) for x in frames]
 
     def create_grass_particles(self, pos, groups):
-        ParticleEffect(pos, choice(self.frames['leaf']), groups)
+        leaf_frames = self.frames.get('leaf')
+        if leaf_frames:
+            ParticleEffect(pos, choice(leaf_frames), groups)
 
     def create_particles(self, frames, pos, groups):
         ParticleEffect(pos, frames, groups)
 
-    def creat_bullet_magic(self,direction, pos, frames, groups):
+    def create_bullet_magic(self, direction, pos: tuple, frames: list, groups) -> None:
+        """C\u043e\u0437\u0434\u0430\u0451\u0442 \u043f\u0443\u043b\u044e \u043c\u0430\u0433\u0438\u0438 \u0441 \u0437\u0430\u0434\u0430\u043d\u043d\u044b\u043c \u043d\u0430\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u0435\u043c."""
         Bullet(direction, pos, frames, groups)
 
     def create_number(self, pos, number, groups, color=None):
         MoveNumberRender(pos, number, groups, color)
+
 
 
 class ParticleEffect(pg.sprite.Sprite):

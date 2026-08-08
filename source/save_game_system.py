@@ -2,9 +2,11 @@ import json
 import os
 from pathlib import Path
 from typing import Dict, List
+from support import BASE_DIR
 
 
-SAVES_DIR = Path('saves')
+SAVES_DIR = BASE_DIR / 'saves'
+
 
 
 def check_saves() -> bool:

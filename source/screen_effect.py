@@ -6,19 +6,16 @@ class ScreenEffectList(pg.sprite.Group):
         super().__init__()
         self.screen = pg.display.get_surface()
 
-    @property
-    def sprites(self):
-        return super().sprites()
+    def update(self, events) -> None:
+        """Oбновляет первый активный эффект (они обрабатываются последовательно)."""
+        active = self.sprites()
+        if active:
+            active[0].update(self.screen, events)
 
-    def update(self,events):
-        if self.sprites:
-            self.sprites[0].update(self.screen,events)
-
-    def get_sprite(self):
-        return self.sprites[0]
-
-
-
+    def get_sprite(self) -> pg.sprite.Sprite | None:
+        """Vозвращает первый активный эффект или None."""
+        active = self.sprites()
+        return active[0] if active else None
 
 class Darking(pg.sprite.Sprite):
     def __init__(self, speed=4, sleep=1000, reverse=False,end_func=lambda:None,start_func=lambda:None):
@@ -47,6 +44,7 @@ class Darking(pg.sprite.Sprite):
         screen.blit(self.surface, self.rect)
 
 class DarkScreenPress(pg.sprite.Sprite):
+    """Eкран затемнения с подсказкой ‘Нажмите любую клавишу для продолжения’."""
     def __init__(self):
         super().__init__()
         self.surface = pg.Surface(pg.display.get_window_size(), pg.SRCALPHA)
@@ -55,17 +53,15 @@ class DarkScreenPress(pg.sprite.Sprite):
         self.time_ = pg.time.get_ticks()
         self.font = pg.font.SysFont('sans-serif', 30)
 
-    def update(self, screen,events):
-            text = self.font.render('Press Any Key to Continue', True, (255, 255, 255))
-            text_rect = text.get_rect(center=(self.screen_width // 2, self.screen_height // 2))
-            screen.blit(self.surface, self.rect)
-            screen.blit(text, text_rect)
-            pg.display.flip()
-            for event in events:
-                if event.type == pg.KEYDOWN:
-                    self.kill()
-            screen.blit(self.surface, self.rect)
-
+    def update(self, screen, events) -> None:
+        screen.blit(self.surface, self.rect)
+        text = self.font.render('Press Any Key to Continue', True, (255, 255, 255))
+        # Используем self.rect.w/h вместо несуществующих self.screen_width/height
+        text_rect = text.get_rect(center=(self.rect.w // 2, self.rect.h // 2))
+        screen.blit(text, text_rect)
+        for event in events:
+            if event.type == pg.KEYDOWN:
+                self.kill()
 
 
 class DarkScreen(pg.sprite.Sprite):

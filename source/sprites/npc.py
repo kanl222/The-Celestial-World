@@ -26,16 +26,21 @@ class Npc(Entity):
         self.dialog.flag = False
         self.is_talking = False
 
-    def npc_update(self, player, events) -> None:
-        for event in events:
-            if event.type == pg.KEYDOWN:
-                if event.key == pg.K_e and not self.dialog.flag and not self.check_distance(player):
-                    self.start_dialog(player)
-                elif event.key == pg.K_ESCAPE or not self.dialog.flag:
-                    self.end_dialog(player)
+    def interact(self, player) -> None:
+        if not self.dialog.flag and not self.check_distance(player):
+            self.start_dialog(player)
+        elif self.dialog.flag:
+            self.end_dialog(player)
+
+    def force_end_dialog(self, player) -> None:
+        if self.dialog.flag:
+            self.end_dialog(player)
+
+    def npc_update(self, player) -> None:
         if self.dialog.flag and self.check_distance(player):
             self.end_dialog(player)
-        if self.dialog.flag:self.dialog.update()
+        if self.dialog.flag:
+            self.dialog.update()
 
     def check_distance(self, player) -> bool:
         return player.get_position().distance_to(self.get_position()) >= 200

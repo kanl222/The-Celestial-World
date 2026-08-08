@@ -2,13 +2,14 @@ import pygame
 from support import import_csv_layout
 from sprites import *
 from config import *
+from pathfinding import Pathfinder
 
 
 
 class Level:
     def __init__(self, data_object, data_npc, data_enemy, visible_sprites,
                  obstacle_sprites, attack_sprites, attackable_sprites, screen_effect,
-                 object_sprites, damage_player, trigger_number, trigger_death_particles,
+                 object_sprites, enemy_sprites, npc_sprites, damage_player, trigger_number, trigger_death_particles,
                  add_exp):
         self.player = None
         self.location = None
@@ -20,22 +21,47 @@ class Level:
         self.attack_sprites = attack_sprites
         self.attackable_sprites = attackable_sprites
         self.object_sprites = object_sprites
+        self.enemy_sprites = enemy_sprites
+        self.npc_sprites = npc_sprites
         self.layouts = None
         self.screen_effect = screen_effect
         self.damage_player = damage_player
         self.trigger_number = trigger_number
         self.trigger_death_particles = trigger_death_particles
         self.add_exp = add_exp
+        self.pathfinder = None
+
 
     def load_map(self):
         self.layouts = {
-            'boundary': import_csv_layout(f'../maps/{self.location}/_floor_blocks.csv'),
-            'object': import_csv_layout(f'../maps/{self.location}/_object.csv'),
-            'entity': import_csv_layout(f'../maps/{self.location}/_entity.csv'),
-            'enemy': import_csv_layout(f'../maps/{self.location}/_enemy.csv')
+            'boundary': import_csv_layout(f'maps/{self.location}/_floor_blocks.csv'),
+            'object': import_csv_layout(f'maps/{self.location}/_object.csv'),
+            'entity': import_csv_layout(f'maps/{self.location}/_entity.csv'),
+            'enemy': import_csv_layout(f'maps/{self.location}/_enemy.csv')
         }
+        # Строим навигационную сетку для поиска пути A*
+        grid = self.create_grid()
+        self.pathfinder = Pathfinder(grid)
+
+    def create_grid(self) -> list[list[int]]:
+        layout = self.layouts['boundary']
+        rows = len(layout)
+        cols = len(layout[0]) if rows > 0 else 0
+        grid = [[0 for _ in range(cols)] for _ in range(rows)]
+        
+        for r in range(rows):
+            for c in range(cols):
+                # '0' в boundary — это стена/препятствие
+                if layout[r][c] == '0':
+                    grid[r][c] = 1
+                # Если в этой координате есть статический объект — это препятствие
+                elif self.layouts['object'][r][c] in self.data_object:
+                    grid[r][c] = 1
+        return grid
+
 
     def create_map(self):
+        import traceback
         try:
             for style, layout in self.layouts.items():
                 for row_index, row in enumerate(layout):
@@ -51,17 +77,20 @@ class Level:
                             self.object_sprites.add_static_object({}, (x, y), [
                                 self.obstacle_sprites])
         except Exception as e:
-            print(e)
+            print(f"[Level] \u041e\u0448\u0438\u0431\u043a\u0430 \u043f\u0440\u0438 \u0441\u043e\u0437\u0434\u0430\u043d\u0438\u0438 \u043a\u0430\u0440\u0442\u044b ({style} [{row_index},{col_index}]): {e}")
+            traceback.print_exc()
 
     def create_enemy(self, style, x, y):
         data = self.data_enemy[style]
         enemy = Enemy(data, (x, y),
-                      [self.visible_sprites, self.attackable_sprites],
+                      [self.visible_sprites, self.attackable_sprites, self.enemy_sprites],
                       self.obstacle_sprites,
                       self.damage_player,
                       self.trigger_number,
                       self.trigger_death_particles,
-                      self.add_exp)
+                      self.add_exp,
+                      self.pathfinder)
+
 
 
     def create_object(self, data, x, y):
@@ -79,7 +108,7 @@ class Level:
         if col == '0' and not self.player.flag_pos_player:
             self.set_player_position((x, y))
         elif col in self.data_npc:
-            Npc((x, y), self.data_npc[col], [self.visible_sprites])
+            Npc((x, y), self.data_npc[col], [self.visible_sprites, self.npc_sprites])
 
 
     def _get_tile_position(self, row_index, col_index):

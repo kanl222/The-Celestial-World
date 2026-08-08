@@ -64,4 +64,4 @@ class MagicLogic:
         if player.energy >= magic.cost:
             player.energy -= magic.cost
             direction = self.get_direction(player)
-            self.animation_player.creat_bullet_magic(direction, player.rect.center,magic.animation_frames(), groups)
+            self.animation_player.create_bullet_magic(direction, player.rect.center, magic.animation_frames(), groups)

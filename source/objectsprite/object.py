@@ -4,7 +4,7 @@ from support import import_folder, import_image
 
 class Object(pg.sprite.Sprite):
     def __init__(self,data: dict, pos: tuple, groups: list):
-        super().__init__(groups)
+        super().__init__()
         if not data:
             self.image = pg.Surface((64,64))
             self.rect = self.image.get_rect(topleft=pos)
@@ -13,10 +13,15 @@ class Object(pg.sprite.Sprite):
         else:
             self.name = data.get('name',"test")
             self.image = self.get_sprite()
+            if not self.image:
+                self.image = pg.Surface((TILESIZE, TILESIZE))
+                self.image.fill('red')
             self.rect = self.image.get_rect(topleft=pos)
             self.hitbox = self.rect.inflate(*data['hitbox_offset'])
             self.sprite_type = 'object'
         self.hitbox.midbottom = self.rect.midbottom
+        self.add(groups)
+
 
 
     def get_sprite(self) -> pg.Surface:

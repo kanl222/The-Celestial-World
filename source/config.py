@@ -1,4 +1,3 @@
-from importlib import __import__
 from support import load_config
 # game setup
 FPS      = 60
@@ -14,7 +13,7 @@ BAR_HEIGHT = 20
 HEALTH_BAR_WIDTH = 200
 ENERGY_BAR_WIDTH = 140
 ITEM_BOX_SIZE = 64
-UI_FONT = '../fonts/helvetica_regular.otf'
+UI_FONT = 'fonts/helvetica_regular.otf'
 UI_FONT_SIZE = 18
 
 # general colors
@@ -35,9 +34,9 @@ BAR_COLOR = '#EEEEEE'
 BAR_COLOR_SELECTED = '#111111'
 UPGRADE_BG_COLOR_SELECTED = '#EEEEEE'
 
-PATH_ANIMATIONS = "../graphics/images/animations"
-PATH_ICONS = "../graphics/images/icons"
-PATH_SPRITES = "../graphics/images/sprites"
+PATH_ANIMATIONS = "graphics/images/animations"
+PATH_ICONS = "graphics/images/icons"
+PATH_SPRITES = "graphics/images/sprites"
 #music
 translation = {'health': 'Здоровье', 'energy': 'Энергия',
                     'intelligence': 'Интеллект', 'body_type': 'Телосложение',
@@ -47,4 +46,5 @@ translation = {'health': 'Здоровье', 'energy': 'Энергия',
 
 sittings = load_config()
 
-__import__('config',globals=sittings)
+# Алиас для будущей совместимости (убран брокенный хак __import__('config', globals=sittings))
+settings = sittings

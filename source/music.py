@@ -3,6 +3,7 @@ from pygame import mixer
 import os
 import json
 import random
+import time
 
 mixer.init()  # инициализируем плеер
 
@@ -13,13 +14,12 @@ class Music:
         self.current_music_index = -1
         self.thread_running = False  # добавляем переменную для хранения состояния потока
 
-    def play_music(self, music_file):
-        """Функция для воспроизведения музыкального файла"""
+    def play_music(self, music_file: str) -> None:
+        """Vоспроизводит музыкальный файл. Не добавляет снова в список — для этого есть add_music_to_list."""
+        self.current_music_index = self.music_list.index(music_file) if music_file in self.music_list else -1
         mixer.music.load(music_file)
         mixer.music.play()
         self.music_playing = True
-        self.current_music_index = len(self.music_list)
-        self.music_list.append(music_file)  # добавляем проигрываемую музыку в список
 
     def stop_music(self):
         """Функция для остановки текущей музыки"""
@@ -55,9 +55,14 @@ class Music:
 
     def add_multiple_music_to_list(self, music_folder):
         """Функция для добавления нескольких музыкальных файлов из папки в список музыки"""
-        for file in os.listdir(music_folder):
+        from support import BASE_DIR
+        folder_path = BASE_DIR / music_folder
+        if not folder_path.exists():
+            print(f"[Music] Папка музыки не найдена: {folder_path}")
+            return
+        for file in os.listdir(folder_path):
             if file.endswith(".mp3"):  # добавляем только файлы .mp3
-                self.add_music_to_list(os.path.join(music_folder, file))
+                self.add_music_to_list(str(folder_path / file))
 
     def add_music_list_to_queue(self, music_list):
         """Функция для добавления списка музыки в очередь на воспроизведение"""
@@ -105,12 +110,13 @@ class Music:
             if not self.is_music_playing():
                 self.check_music_list()
             mixer.get_busy()  # чтобы играло в фоновом режиме без остановки воспроизведения музыки
+            time.sleep(0.1)  # Освобождаем CPU: проверяем не чаще 10 раз в секунду
 
     def stop_check_music_list(self):
         """Функция для остановки потока проверки списка музыки"""
         self.thread_running = False  # изменяем флаг работы потока\n\n
         
-    def __del__(self):        
-        "Функция для очистки памяти и остановки потока при удалении объекта"""
-        self.stop_check_music_list()  # останавливаем поток, если он был запущен
-        mixer.quit()  # выключаем плеер
+    def __del__(self) -> None:
+        """Oчищает память: останавливает поток и выключает плеер при удалении объекта."""
+        self.stop_check_music_list()
+        mixer.quit()

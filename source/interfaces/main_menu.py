@@ -4,20 +4,22 @@ from config import UPGRADE_BG_COLOR_SELECTED
 from save_game_system import check_saves
 from .widget import button, ListButtons, _TextBox, Menu
 from .sittings import SittingsMenu
+from support import import_image, resolve_path
 
 
 class MainMenu(Menu):
     def __init__(self, start_game):
         width, height = config.sittings["width"], config.sittings['height']
         super(MainMenu, self).__init__((340, 360), width // 12 * 10.2, height // 2)
-        self.background = pygame.image.load(
-            f'../graphics/backgrounds/main_menu/background_{width}x{height}.png')
-        self.background_rect = self.background.get_rect()
+        self.background = import_image(
+            f'graphics/backgrounds/main_menu/background_{width}x{height}.png')
+        self.background_rect = self.background.get_rect() if self.background else pygame.Rect(0, 0, width, height)
         self.sittings = SittingsMenu()
-        pygame.mixer.music.load('../music/Ambient 1.mp3')
+        pygame.mixer.music.load(str(resolve_path('music/Ambient 1.mp3')))
         pygame.mixer.music.set_volume(config.sittings["volume_music"])
         pygame.mixer.music.play()
         self.start_game = start_game
+
         self.ColorTextShadow = 'grey'
         self.ColorText = 'black'
         padding_top = 20

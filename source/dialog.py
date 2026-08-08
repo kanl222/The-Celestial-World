@@ -1,5 +1,6 @@
 import pygame as pg
 import json
+from support import BASE_DIR
 
 
 class DialogSystem:
@@ -19,9 +20,11 @@ class DialogSystem:
         self.flag_known = False
 
     def import_data_dialogs(self) -> dict:
-        with open(f"../assets/npc/{self.name}/dialogs/{self.name}.json", 'r', encoding='utf-8') as file_:
+        path = BASE_DIR / 'assets' / 'npc' / self.name / 'dialogs' / f'{self.name}.json'
+        with open(path, 'r', encoding='utf-8') as file_:
             data = json.load(file_)
             return data if data else {}
+
             
     def render_text_shadow(self, text: str, pos: tuple, align: str) -> None:
         text_shadow = self.font.render(text, True, 'black')

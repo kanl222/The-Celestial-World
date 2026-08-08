@@ -33,13 +33,13 @@ class EffectsList(pg.sprite.Group):
 
 
 class Effect(pg.sprite.Sprite):
+    """Bазовый класс временного эффекта на энтитет."""
     def __init__(self, data):
         super().__init__()
         self.power = data['power']
         self.duration = data['duration'] * 1000
-        self.cooldawn = 2000
+        self.cooldown = 2000  # исправлена опечатка: cooldawn → cooldown
         self.time_last = pg.time.get_ticks()
-        #self.rect = self.icon.get_rect()
         self.start_time = pg.time.get_ticks()
 
     def __repr__(self):
@@ -59,14 +59,16 @@ class Effect(pg.sprite.Sprite):
     def update_start_time(self):
         self.start_time = pg.time.get_ticks()
 
-    def update(self, entity):
+    def update(self, entity) -> None:
+        """Oбновляет длительность эффекта и применяет его с учётом cooldown."""
         self.update_duration()
         current_time = pg.time.get_ticks()
-        if current_time - self.time_last >= self.cooldawn:
+        if current_time - self.time_last >= self.cooldown:
             self.apply_effect(entity)
             self.time_last = pg.time.get_ticks()
 
-    def import_image(self, path):
+    def import_image(self, path: str) -> pg.Surface:
+        """Zагружает изображение иконки эффекта."""
         return pg.image.load(path).convert_alpha()
 
 class Strength(Effect):
@@ -88,11 +90,10 @@ class Burning(Effect):
         entity.get_damage_effect(self.damage)
 
 class Poison(Effect):
+    """Eффект отравления: периодически наносит урон."""
     def __init__(self, data):
-        #self.icon = self.import_image(f"{PATH_ICONS}/effect/{self.__class__.__name__}.png")
         super().__init__(data)
-        print(self.__class__.__name__)
-        self.damage = Damage(self.power,self.__class__.__name__)
+        self.damage = Damage(self.power, self.__class__.__name__)
 
     def apply_effect(self, entity):
         entity.get_damage_effect(self.damage)
@@ -132,19 +133,18 @@ class Regeneration(Effect):
 
 
 
-def get_effect(effect_name:str) -> Effect:
-    if effect_name.lower() == 'burning':
-        return Burning
-    elif effect_name.lower() == 'poison':
-        return Poison
-    elif effect_name.lower() == 'healthboost':
-        return HealthBoost
-    elif effect_name.lower() == 'strength':
-        return Strength
-    elif effect_name.lower() == 'weakness':
-        return Weakness
-    elif effect_name.lower() == 'blind':
-        return Blind
-    elif effect_name.lower() == 'regeneration':
-        return Regeneration
+# Реестр эффектов: добавление нового эффекта не требует изменения get_effect()
+_EFFECT_REGISTRY: dict[str, type[Effect]] = {
+    cls.__name__.lower(): cls
+    for cls in [Burning, Poison, HealthBoost, Strength, Weakness, Blind, Regeneration]
+}
 
+
+def get_effect(effect_name: str) -> type[Effect] | None:
+    """Vозвращает класс эффекта по имени или None, если эффект не найден.
+
+    Пример:
+        get_effect('burning') -> Burning
+        get_effect('unknown') -> None
+    """
+    return _EFFECT_REGISTRY.get(effect_name.lower())
